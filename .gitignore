@@ -1,0 +1,30 @@
+# 编译产物
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试缓存
+*.test
+*.test.exe
+*.test.dll
+*.test.so
+*.test.dylib
+*.out
+
+# Go 工作区
+go.work
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+bin/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 系统文件
+Thumbs.db
