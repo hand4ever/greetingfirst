@@ -20,3 +20,12 @@ func (*_Demo) Search(c *echo.Context) error {
 	}
 	return response.Ok(c, f)
 }
+
+// ErrDebug ...
+func (*_Demo) ErrDebug(c *echo.Context) error {
+	var s demo.Echo
+	if err := c.Bind(&s); err != nil {
+		return response.NotOk(c, "参数有误")
+	}
+	return response.Ok(c, s)
+}

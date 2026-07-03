@@ -9,6 +9,7 @@ import (
 func main() {
 	e := echo.New()
 
+	//e.HTTPErrorHandler = middle.CustomHTTPErrorHandler
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
