@@ -2,9 +2,19 @@ package response
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v5"
 )
+
+// getCost reads start time from context and returns elapsed time string.
+func getCost(c *echo.Context) string {
+	start, ok := c.Get("i_start_time").(time.Time)
+	if !ok {
+		return "-"
+	}
+	return time.Since(start).String()
+}
 
 // Ok ...
 func Ok(c *echo.Context, data any) error {
@@ -12,10 +22,9 @@ func Ok(c *echo.Context, data any) error {
 		Code:    ErrCodeOk,
 		Message: "",
 		Data:    data,
-		Cost:    "-0.111s",
 	}
 	respData.TraceID = c.Response().Header().Get(echo.HeaderXRequestID)
-	//respData.Cost = c.Get("i_cost_time").(string)
+	respData.Cost = getCost(c)
 	return c.JSON(http.StatusOK, respData)
 }
 
@@ -25,9 +34,9 @@ func NotOk(c *echo.Context, message string) error {
 		Code:    ErrCodeCustom,
 		Message: message,
 		Data:    "",
-		Cost:    "-0.111s",
 	}
 	respData.TraceID = c.Response().Header().Get(echo.HeaderXRequestID)
+	respData.Cost = getCost(c)
 	return c.JSON(http.StatusOK, respData)
 }
 
@@ -37,9 +46,8 @@ func NotOkWithCode(c *echo.Context, message string, code Code) error {
 		Code:    code,
 		Message: message,
 		Data:    "",
-		Cost:    "-0.111222s",
 	}
-
 	respData.TraceID = c.Response().Header().Get(echo.HeaderXRequestID)
+	respData.Cost = getCost(c)
 	return c.JSON(http.StatusOK, respData)
 }

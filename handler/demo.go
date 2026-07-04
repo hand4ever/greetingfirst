@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v5"
 	"greeting.first/entity/demo"
@@ -29,6 +30,7 @@ func (*_Demo) ErrDebug(c *echo.Context) error {
 	if err := c.Bind(&s); err != nil {
 		return response.NotOk(c, "参数有误")
 	}
+	time.Sleep(time.Millisecond * 300)
 	c.Logger().Info("<ErrDebug>", "request", s, "tid", tid)
 	return response.Ok(c, s)
 }

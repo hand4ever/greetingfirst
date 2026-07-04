@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"greeting.first/middle"
 	"greeting.first/router"
 )
 
@@ -13,7 +14,7 @@ func main() {
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
-	//e.Use(middle.CostTime)
+	e.Use(middle.CostTime)
 
 	router.Router(e)
 
