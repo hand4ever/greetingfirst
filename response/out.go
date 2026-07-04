@@ -12,9 +12,10 @@ func Ok(c *echo.Context, data any) error {
 		Code:    ErrCodeOk,
 		Message: "",
 		Data:    data,
-		TraceID: "dummy",
 		Cost:    "-0.111s",
 	}
+	respData.TraceID = c.Response().Header().Get(echo.HeaderXRequestID)
+	//respData.Cost = c.Get("i_cost_time").(string)
 	return c.JSON(http.StatusOK, respData)
 }
 
@@ -24,20 +25,21 @@ func NotOk(c *echo.Context, message string) error {
 		Code:    ErrCodeCustom,
 		Message: message,
 		Data:    "",
-		TraceID: "dummy",
 		Cost:    "-0.111s",
 	}
+	respData.TraceID = c.Response().Header().Get(echo.HeaderXRequestID)
 	return c.JSON(http.StatusOK, respData)
 }
 
 // NotOkWithCode with special error code
 func NotOkWithCode(c *echo.Context, message string, code Code) error {
 	respData := &ErrMsg{
-		Code:    ErrCodeCustom,
+		Code:    code,
 		Message: message,
 		Data:    "",
-		TraceID: "dummy111",
 		Cost:    "-0.111222s",
 	}
+
+	respData.TraceID = c.Response().Header().Get(echo.HeaderXRequestID)
 	return c.JSON(http.StatusOK, respData)
 }

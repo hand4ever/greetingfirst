@@ -12,6 +12,8 @@ func main() {
 	//e.HTTPErrorHandler = middle.CustomHTTPErrorHandler
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.RequestID())
+	//e.Use(middle.CostTime)
 
 	router.Router(e)
 

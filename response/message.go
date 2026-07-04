@@ -6,6 +6,7 @@ type ErrMsg struct {
 	Data    any    `json:"data"`
 	TraceID string `json:"trace_id"`
 	Cost    string `json:"cost"`
+	Extra   string `json:"extra,omitempty"`
 }
 
 type Code int
