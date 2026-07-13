@@ -11,3 +11,15 @@ GET {{host}}/demo/err/debug/hello
 
 ### 测试接口：通过手机号查询用户（13636311005）
 GET {{host}}/demo/user/phone
+
+### SHA256 哈希计算：传入 text 参数返回 SHA256 哈希值
+GET {{host}}/demo/sha256?text=hello
+
+### SHA256 哈希计算：空字符串
+GET {{host}}/demo/sha256?text=
+
+### SHA256 哈希计算：中文文本
+GET {{host}}/demo/sha256?text=%E4%BD%A0%E5%A5%BD
+
+### SHA256 哈希计算：缺失参数（应返回错误）
+GET {{host}}/demo/sha256

@@ -80,6 +80,7 @@ greeting/
 |------|------|------|
 | GET | `/demo/search?tag=a&tag=b` | 接收多值查询参数 `tag` |
 | GET | `/demo/err/debug/:str` | 接收路径参数 `str` 并返回 |
+| GET | `/demo/sha256?text=hello` | 计算输入文本的 SHA256 哈希值，返回 `{input, hash}` |
 
 ## 本地开发
 
@@ -110,6 +111,7 @@ make buildqa
 - 初始化项目骨架：分层架构、统一响应封装、Echo 中间件栈
 - 实现请求耗时统计（`middle.CostTime` + `response.getCost`），修复 `cost` 字段取值 panic
 - 引入 GORM + SQLite：创建 `model/` 目录，全局 `model.DB` 实例，启动时自动初始化
+- 新增 `/demo/sha256` 接口：接收 `text` 查询参数，返回 SHA256 哈希值及原始输入
 
 ---
 
