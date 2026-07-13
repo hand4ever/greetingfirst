@@ -1,0 +1,118 @@
+# Greeting
+
+基于 [Echo v5](https://github.com/labstack/echo) 的 Go Web 服务示例项目，采用分层架构搭建，内置统一响应格式、请求耗时统计、请求链路追踪等基础能力。
+
+## 技术栈
+
+| 项目 | 说明 |
+|------|------|
+| 语言 | Go 1.26.3 |
+| Web 框架 | Echo v5.2.1 |
+| 模块名 | `greeting.first` |
+| 监听端口 | `:1323` |
+
+## 目录结构
+
+```
+greeting/
+├── main.go            # 程序入口，初始化 Echo、注册中间件、启动服务
+├── go.mod             # 模块定义与依赖
+├── Makefile           # 本地运行 / 测试服部署脚本
+├── router/            # 路由分组与注册
+├── handler/           # 请求处理（控制器层）
+├── entity/            # 请求参数 / 数据实体定义
+├── response/          # 统一 JSON 响应格式封装
+└── middle/            # 自定义中间件
+```
+
+## 分层职责
+
+| 目录 | 职责 |
+|------|------|
+| `router/` | 路由分组与注册，按业务模块划分 |
+| `handler/` | 接收请求、参数绑定、调用响应封装 |
+| `entity/` | 请求参数结构体（查询参数 / 路径参数等） |
+| `response/` | 统一的成功 / 错误响应结构 |
+| `middle/` | 自定义中间件（耗时统计等） |
+
+## 中间件
+
+全局注册的中间件（按执行顺序）：
+
+| 中间件 | 来源 | 作用 |
+|--------|------|------|
+| `RequestLogger` | Echo 内置 | 请求日志 |
+| `Recover` | Echo 内置 | panic 恢复，避免进程崩溃 |
+| `RequestID` | Echo 内置 | 生成请求追踪 ID（`X-Request-ID`） |
+| `CostTime` | 自定义 | 记录请求耗时，并写入响应 `cost` 字段 |
+
+> 注：自定义错误处理器 `CustomHTTPErrorHandler` 暂未启用。
+
+## 统一响应格式
+
+所有接口统一返回如下 JSON：
+
+```json
+{
+  "code": 0,
+  "message": "",
+  "data": {},
+  "trace_id": "请求 ID",
+  "cost": "处理耗时，如 1.234ms",
+  "extra": "可选扩展字段"
+}
+```
+
+业务错误码定义（见 `response/message.go`）：
+
+| 常量 | 值 | 说明 |
+|------|------|------|
+| `ErrCodeOk` | `0` | 成功 |
+| `ErrCodeCustom` | `100001` | 通用业务错误 |
+| `ErrCodeNetwork` | `100002` | 网络错误 |
+
+## API 列表
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/demo/search?tag=a&tag=b` | 接收多值查询参数 `tag` |
+| GET | `/demo/err/debug/:str` | 接收路径参数 `str` 并返回 |
+
+## 本地开发
+
+```bash
+# 本地运行
+make rundev
+# 等价命令
+go run main.go
+```
+
+启动后访问 `http://localhost:1323`。
+
+## 测试服部署
+
+```bash
+make buildqa
+```
+
+该命令会：交叉编译为 Linux amd64 二进制，scp 到测试服务器，并通过 `supervisorctl` 重启服务。
+（服务器地址与部署路径见 `Makefile`。）
+
+---
+
+## 更新日志
+
+> 本区块用于持续记录功能迭代，后续新增功能请在此追加。
+
+- 初始化项目骨架：分层架构、统一响应封装、Echo 中间件栈
+- 实现请求耗时统计（`middle.CostTime` + `response.getCost`），修复 `cost` 字段取值 panic
+
+---
+
+## TODO / 待完善
+
+- [ ] 启用自定义错误处理器 `CustomHTTPErrorHandler`，补充 404/500 等错误页
+- [ ] 补充更多业务接口与路由分组
+- [ ] 增加配置管理（端口、环境变量等）
+- [ ] 增加单元测试
+- [ ] 完善 CI / 部署流程

@@ -1,0 +1,10 @@
+@host = http://localhost:1323
+
+### 健康检查 / 根路径
+# GET {{host}}/
+
+### 搜索接口：接收多值查询参数 tag
+GET {{host}}/demo/search?tag=go&tag=web&tag=api
+
+### 调试接口：接收路径参数 str
+GET {{host}}/demo/err/debug/hello
