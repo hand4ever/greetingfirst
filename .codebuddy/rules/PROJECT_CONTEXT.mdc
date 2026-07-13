@@ -1,0 +1,55 @@
+---
+description: Greeting 项目上下文信息
+alwaysApply: true
+enabled: true
+updatedAt: 2026-07-13T11:10:00.000Z
+provider:
+---
+
+# 项目架构
+
+本项目基于 Echo v5 框架，采用以下分层架构：
+
+```
+router/    → 路由分组与注册
+handler/   → 请求处理（控制器层），调用 response 封装返回
+entity/    → 请求参数 / 数据实体定义
+model/     → 数据库映射模型（GORM），全局 DB 实例
+response/  → 统一 JSON 响应格式封装
+middle/    → 自定义中间件
+```
+
+## 目录规范
+
+- `router/`：按业务模块分组注册路由，入口为 `router/router.go`，各模块单独拆文件
+- `handler/`：使用包级变量 `var Xxx = &_Xxx{}` 暴露实例，方法接收 `*echo.Context`
+- `entity/`：按模块分子目录（如 `entity/demo/`），结构体 tag 使用 `query`、`param`、`json`
+- `model/`：数据库映射模型（GORM），全局实例 `model.DB`，模型文件直接放在 `model/` 目录下
+- `response/`：必须使用 `response.Ok` / `response.NotOk` / `response.NotOkWithCode` 统一返回
+- `middle/`：自定义中间件使用 `next(c)` 链式调用
+
+## 统一响应格式
+
+所有接口统一使用以下结构返回 JSON：
+
+```go
+type ErrMsg struct {
+    Code    Code   `json:"code"`
+    Message string `json:"message"`
+    Data    any    `json:"data"`
+    TraceID string `json:"trace_id"`
+    Cost    string `json:"cost"`
+    Extra   string `json:"extra,omitempty"`
+}
+```
+
+成功使用 `response.Ok(c, data)`，错误使用 `response.NotOk(c, "message")` 或 `response.NotOkWithCode(c, "message", code)`。
+
+## 中间件执行顺序
+
+全局中间件在 `main.go` 中按以下顺序注册（从上到下执行）：
+
+1. `RequestLogger` — 请求日志
+2. `Recover` — panic 恢复
+3. `RequestID` — 生成 X-Request-ID
+4. `CostTime` — 耗时统计

@@ -1,0 +1,61 @@
+---
+description: Go 语言编程风格规范
+alwaysApply: true
+enabled: true
+updatedAt: 2026-07-13T11:00:00.000Z
+provider:
+---
+
+# Go 编程风格
+
+- 使用 `go fmt` / `gofumpt` 格式化所有 Go 代码，提交前必须执行
+- 使用 `go build ./...` 确保编译通过后再提交
+
+## 命名规范
+
+- **包名**：小写单词，不使用下划线或驼峰（如 `handler`、`model`、`entity`）
+- **导出标识符**：大写开头，遵循驼峰命名（如 `InitDB`、`ErrMsg`）
+- **未导出标识符**：小写开头（如 `_Demo`、`testPhone`、`initDB`）
+- **常量**：驼峰命名，不使用全大写（如 `localTimeFormat`，不是 `LOCAL_TIME_FORMAT`）
+- **接口**：单方法接口以 `-er` 结尾，如 `Reader`、`Writer`
+
+## 变量与类型
+
+- 优先使用短变量声明 `:=`
+- 零值初始化使用 `var`（如 `var body response.ErrMsg`）
+- 避免 `var` 和 `:=` 混用在同一作用域
+- 自定义类型优先定义在对应的业务文件或 model 文件中
+
+## 错误处理
+
+```go
+// 错误始终检查并及早返回
+if err != nil {
+    return err  // 或带上上下文: fmt.Errorf("xxx: %w", err)
+}
+```
+- 不忽略 error，不使用 `_` 跳过错误（除非有充分理由并注释说明）
+- 使用 `fmt.Errorf` 包装错误时携带上下文信息
+
+## 控制流
+
+- 保持缩进层级 ≤ 3 层，善用 `if err != nil { return }` 减少嵌套
+- 避免 `else` 分支，尽量使用提前 return
+
+## 注释
+
+- **注释必须英文**
+- 导出函数、类型必须有注释，格式为 `// Name describes ...`
+- 复杂逻辑在代码上方加注释说明意图
+
+## 文件与函数
+
+- 单文件不超过 500 行
+- 函数不超过 80 行，复杂逻辑拆分子函数
+- 方法接收器统一使用类型首字母小写（如 `func (*_Demo) Search(c *echo.Context) error`）
+
+## 其他
+
+- 字符串拼接少量用 `+`，多量用 `strings.Builder` 或 `fmt.Sprintf`
+- 切片/Map 声明优先使用字面量或 `make` 预分配容量
+- 不使用 `panic` 处理常规业务错误，仅用于不可恢复的初始化失败
