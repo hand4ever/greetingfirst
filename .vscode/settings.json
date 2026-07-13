@@ -1,0 +1,7 @@
+{
+  "rest-client.environmentVariables": {},
+  "files.associations": {
+    "*.http": "http"
+  },
+  "go.testFlags": ["-v"]
+}

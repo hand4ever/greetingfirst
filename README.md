@@ -8,6 +8,7 @@
 |------|------|
 | 语言 | Go 1.26.3 |
 | Web 框架 | Echo v5.2.1 |
+| ORM | GORM v1.31.2 (SQLite) |
 | 模块名 | `greeting.first` |
 | 监听端口 | `:1323` |
 
@@ -21,6 +22,7 @@ greeting/
 ├── router/            # 路由分组与注册
 ├── handler/           # 请求处理（控制器层）
 ├── entity/            # 请求参数 / 数据实体定义
+├── model/             # 数据库映射模型（GORM），全局 DB 实例
 ├── response/          # 统一 JSON 响应格式封装
 └── middle/            # 自定义中间件
 ```
@@ -32,6 +34,7 @@ greeting/
 | `router/` | 路由分组与注册，按业务模块划分 |
 | `handler/` | 接收请求、参数绑定、调用响应封装 |
 | `entity/` | 请求参数结构体（查询参数 / 路径参数等） |
+| `model/` | 数据库映射模型（GORM），通过 `model.DB` 访问全局实例 |
 | `response/` | 统一的成功 / 错误响应结构 |
 | `middle/` | 自定义中间件（耗时统计等） |
 
@@ -106,6 +109,7 @@ make buildqa
 
 - 初始化项目骨架：分层架构、统一响应封装、Echo 中间件栈
 - 实现请求耗时统计（`middle.CostTime` + `response.getCost`），修复 `cost` 字段取值 panic
+- 引入 GORM + SQLite：创建 `model/` 目录，全局 `model.DB` 实例，启动时自动初始化
 
 ---
 

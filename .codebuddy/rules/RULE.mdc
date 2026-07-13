@@ -14,6 +14,7 @@ provider:
 router/    → 路由分组与注册
 handler/   → 请求处理（控制器层），调用 response 封装返回
 entity/    → 请求参数 / 数据实体定义
+model/     → 数据库映射模型（GORM），全局 DB 实例
 response/  → 统一 JSON 响应格式封装
 middle/    → 自定义中间件
 ```
@@ -23,6 +24,7 @@ middle/    → 自定义中间件
 - `router/`：按业务模块分组注册路由，入口为 `router/router.go`，各模块单独拆文件
 - `handler/`：使用包级变量 `var Xxx = &_Xxx{}` 暴露实例，方法接收 `*echo.Context`
 - `entity/`：按模块分子目录（如 `entity/demo/`），结构体 tag 使用 `query`、`param`、`json`
+- `model/`：数据库映射模型（GORM），全局实例 `model.DB`，模型文件直接放在 `model/` 目录下
 - `response/`：必须使用 `response.Ok` / `response.NotOk` / `response.NotOkWithCode` 统一返回
 - `middle/`：自定义中间件使用 `next(c)` 链式调用
 
@@ -63,7 +65,30 @@ type ErrMsg struct {
 ## Git 规范
 
 - **所有 commit message 必须使用英文**
+- **代码注释也必须使用英文**
 - 推荐格式：`type: brief description`（如 `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`）
+
+## 单元测试
+
+- 测试文件命名：`xxx_test.go`，与源文件同目录
+- Handler 测试：使用 `httptest.NewRequest` + `echo.New().NewContext` 构造请求，通过 `rec.Body.String()` 获取响应
+- Model 测试：直接调用模型方法，验证返回值与数据库状态
+- **测试输出**：每个测试用例在断言全部通过后，应使用 `logOK` 打印成功时的响应内容，确保无 `-v` 时也能看到输出：
+  - 每个测试文件需在顶部定义辅助函数：
+    ```go
+    func logOK(t *testing.T, format string, args ...interface{}) {
+        t.Helper()
+        msg := fmt.Sprintf(format, args...)
+        if testing.Verbose() {
+            t.Log(msg)
+        } else {
+            fmt.Println(msg)
+        }
+    }
+    ```
+  - Handler 测试打印 `logOK(t, "响应内容: %s", rec.Body.String())`
+  - Model 测试使用 `json.MarshalIndent` 格式化后打印 `logOK(t, "xxx成功:\n%s", b)`
+- 运行全部测试：`go test -v ./... -count=1`
 
 ## 代码风格
 

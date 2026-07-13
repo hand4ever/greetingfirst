@@ -9,4 +9,5 @@ func demo(e *echo.Echo) {
 	d := e.Group("/demo")
 	d.GET("/search", handler.Demo.Search)
 	d.GET("/err/debug/:str", handler.Demo.ErrDebug)
+	d.GET("/user/phone", handler.Demo.GetUserByPhoneTest)
 }
