@@ -1,0 +1,13 @@
+---
+description: AI 语言偏好
+alwaysApply: true
+enabled: true
+updatedAt: 2026-07-13T10:54:00.000Z
+provider:
+---
+
+# AI 语言偏好
+
+- **思考与输出语言**：使用简体中文进行思考、分析和回答
+- 与用户交互、解释说明、错误提示等均使用中文
+- 代码注释、commit message 仍然使用英文（遵循项目 Git 规范）
