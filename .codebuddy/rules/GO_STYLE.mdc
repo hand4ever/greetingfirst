@@ -25,6 +25,7 @@ provider:
 - 零值初始化使用 `var`（如 `var body response.ErrMsg`）
 - 避免 `var` 和 `:=` 混用在同一作用域
 - 自定义类型优先定义在对应的业务文件或 model 文件中
+- 使用 `any` 替代 `interface{}`：`any` 是 Go 1.18+ 的类型别名，更简洁可读（如 `map[string]any` 而非 `map[string]interface{}`）
 
 ## 错误处理
 

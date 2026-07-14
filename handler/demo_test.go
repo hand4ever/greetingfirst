@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 }
 
 // logOK always prints log, even without -v flag
-func logOK(t *testing.T, format string, args ...interface{}) {
+func logOK(t *testing.T, format string, args ...any) {
 	t.Helper()
 	msg := fmt.Sprintf(format, args...)
 	if testing.Verbose() {
@@ -60,11 +60,11 @@ func TestSearch_MultipleTags(t *testing.T) {
 		t.Errorf("expected code 0, got %d", body.Code)
 	}
 
-	data, ok := body.Data.(map[string]interface{})
+	data, ok := body.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("data is not map: %T", body.Data)
 	}
-	tags, ok := data["tag"].([]interface{})
+	tags, ok := data["tag"].([]any)
 	if !ok {
 		t.Fatalf("tag is not array: %T", data["tag"])
 	}
@@ -115,7 +115,7 @@ func TestErrDebug(t *testing.T) {
 		t.Errorf("expected code 0, got %d", body.Code)
 	}
 
-	data, ok := body.Data.(map[string]interface{})
+	data, ok := body.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("data is not map: %T", body.Data)
 	}
@@ -141,7 +141,7 @@ func TestErrDebug_ChineseStr(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
 		t.Fatalf("failed to parse response: %v", err)
 	}
-	data, ok := body.Data.(map[string]interface{})
+	data, ok := body.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("data is not map: %T", body.Data)
 	}
@@ -173,7 +173,7 @@ func TestGetUserByPhoneTest_Create(t *testing.T) {
 		t.Fatalf("expected code 0, got %d, message: %s", body.Code, body.Message)
 	}
 
-	data, ok := body.Data.(map[string]interface{})
+	data, ok := body.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("data is not map: %T", body.Data)
 	}
@@ -240,7 +240,7 @@ func TestGetUserByPhoneTest_Restore(t *testing.T) {
 		t.Fatalf("expected code 0 (restored), got %d, message: %s", body.Code, body.Message)
 	}
 
-	data, ok := body.Data.(map[string]interface{})
+	data, ok := body.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("data is not map: %T", body.Data)
 	}

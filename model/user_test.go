@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 }
 
 // logOK always prints log, even without -v flag
-func logOK(t *testing.T, format string, args ...interface{}) {
+func logOK(t *testing.T, format string, args ...any) {
 	t.Helper()
 	msg := fmt.Sprintf(format, args...)
 	if testing.Verbose() {

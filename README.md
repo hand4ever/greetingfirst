@@ -46,10 +46,36 @@ greeting/
 |--------|------|------|
 | `RequestLogger` | Echo 内置 | 请求日志 |
 | `Recover` | Echo 内置 | panic 恢复，避免进程崩溃 |
+| `CORS` | Echo 内置 | 跨域资源共享，允许前端从不同源访问 API |
 | `RequestID` | Echo 内置 | 生成请求追踪 ID（`X-Request-ID`） |
 | `CostTime` | 自定义 | 记录请求耗时，并写入响应 `cost` 字段 |
 
 > 注：自定义错误处理器 `CustomHTTPErrorHandler` 暂未启用。
+
+## CORS 配置
+
+CORS 跨域支持通过 Echo v5 内置中间件实现，配置变量定义在 `main.go` 中的 `corsConfig`：
+
+```go
+var corsConfig = middleware.CORSConfig{
+    AllowOrigins:     []string{"*"},                                                      // 允许的来源域名
+    AllowMethods:     []string{http.MethodGet, http.MethodPost, ...},                     // 允许的 HTTP 方法
+    AllowHeaders:     []string{"Content-Type", "Authorization", "X-Requested-With", ...}, // 允许的请求头
+    AllowCredentials: false,                                                               // 是否允许携带凭证（Cookie/Authorization）
+    MaxAge:           86400,                                                               // 预检缓存时间（秒）
+}
+```
+
+**自定义配置**：
+
+| 场景 | 修改方式 |
+|------|----------|
+| 限制特定域名 | 将 `AllowOrigins` 改为 `[]string{"https://myapp.com"}` |
+| 允许凭证模式 | 将 `AllowCredentials` 改为 `true`（此时 `AllowOrigins` 不能为 `*`） |
+| 限制 HTTP 方法 | 修改 `AllowMethods` 列表 |
+| 调整预检缓存 | 修改 `MaxAge` 值（单位：秒） |
+
+开发环境默认允许所有来源（`*`），生产环境部署时建议按需修改。
 
 ## 统一响应格式
 
@@ -108,10 +134,13 @@ make buildqa
 
 > 本区块用于持续记录功能迭代，后续新增功能请在此追加。
 
-- 初始化项目骨架：分层架构、统一响应封装、Echo 中间件栈
-- 实现请求耗时统计（`middle.CostTime` + `response.getCost`），修复 `cost` 字段取值 panic
-- 引入 GORM + SQLite：创建 `model/` 目录，全局 `model.DB` 实例，启动时自动初始化
-- 新增 `/demo/sha256` 接口：接收 `text` 查询参数，返回 SHA256 哈希值及原始输入
+| 添加时间 | 说明 |
+|----------|------|
+| 2026-06-30 | 初始化项目骨架：分层架构、统一响应封装、Echo 中间件栈 |
+| 2026-07-04 | 实现请求耗时统计（`middle.CostTime` + `response.getCost`），修复 `cost` 字段取值 panic |
+| 2026-07-13 | 引入 GORM + SQLite：创建 `model/` 目录，全局 `model.DB` 实例，启动时自动初始化 |
+| 2026-07-13 | 新增 `/demo/sha256` 接口：接收 `text` 查询参数，返回 SHA256 哈希值及原始输入 |
+| 2026-07-14 | 新增 CORS 跨域支持：使用 Echo v5 内置中间件，默认允许所有来源，可配置域名、方法、请求头等 |
 
 ---
 

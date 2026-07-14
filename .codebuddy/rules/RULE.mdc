@@ -26,22 +26,11 @@ provider:
 
 ## 单元测试
 
-- 测试文件命名：`xxx_test.go`，与源文件同目录
-- Handler 测试：使用 `httptest.NewRequest` + `echo.New().NewContext` 构造请求，通过 `rec.Body.String()` 获取响应
-- Model 测试：直接调用模型方法，验证返回值与数据库状态
-- **测试输出**：每个测试用例在断言全部通过后，应使用 `logOK` 打印成功时的响应内容，确保无 `-v` 时也能看到输出：
-  - 每个测试文件需在顶部定义辅助函数：
-    ```go
-    func logOK(t *testing.T, format string, args ...interface{}) {
-        t.Helper()
-        msg := fmt.Sprintf(format, args...)
-        if testing.Verbose() {
-            t.Log(msg)
-        } else {
-            fmt.Println(msg)
-        }
-    }
-    ```
-  - Handler 测试打印 `logOK(t, "响应内容: %s", rec.Body.String())`
-  - Model 测试使用 `json.MarshalIndent` 格式化后打印 `logOK(t, "xxx成功:\n%s", b)`
-- 运行全部测试：`go test -v ./... -count=1`
+详见 `TEST_STYLE.mdc` 规范，涵盖：
+- Handler 测试（`httptest.NewRequest` + `echo.New().NewContext`）
+- Middleware / 集成测试（`e.ServeHTTP`）
+- Model 测试（直接调用 + `json.MarshalIndent`）
+- `logOK` 辅助函数（每测试文件必须定义）
+- `TestMain` 数据库初始化（`:memory:` + `AutoMigrate`）
+- 断言风格（`t.Fatalf` vs `t.Errorf`）
+- 运行命令：`go test -v ./... -count=1`

@@ -1,0 +1,155 @@
+---
+description: Go 单元测试编写规范
+alwaysApply: true
+enabled: true
+updatedAt: 2026-07-14T00:00:00.000Z
+provider:
+---
+
+# Go 单元测试规范
+
+## 文件与命名
+
+- 测试文件与源文件同目录，命名：`xxx_test.go`
+- 测试函数命名：`Test<FuncName>_<Scenario>`（如 `TestSearch_NoTags`、`TestGetUserByID_NotFound`）
+- 测试函数必须接收 `*testing.T`
+
+## logOK 辅助函数
+
+**每个测试文件**顶部必须定义 `logOK` 辅助函数，确保 `-v` 未启用时也能看到输出：
+
+```go
+func logOK(t *testing.T, format string, args ...any) {
+    t.Helper()
+    msg := fmt.Sprintf(format, args...)
+    if testing.Verbose() {
+        t.Log(msg)
+    } else {
+        fmt.Println(msg)
+    }
+}
+```
+
+> 注：`handler` 包中若已有 `logOK` 定义（共享使用），可省略重复定义。
+
+## 断言风格
+
+- **致命错误**用 `t.Fatalf`：状态码错误、JSON 解析失败等，测试不应继续
+- **非致命错误**用 `t.Errorf`：字段值不匹配等，允许继续执行剩余断言
+- 错误断言消息中明确写出期望值和实际值：`t.Errorf("expected xxx, got yyy")`
+- 先断言状态码 / 成功标志，再解析响应体
+
+## Handler 测试
+
+```go
+func TestXxx_Scenario(t *testing.T) {
+    e := echo.New()
+    req := httptest.NewRequest(http.MethodGet, "/path?param=value", nil)
+    rec := httptest.NewRecorder()
+    c := e.NewContext(req, rec)
+
+    // 若 handler 依赖 CostTime 中间件设置的上下文值
+    c.Set("i_start_time", time.Now())
+
+    if err := Handler.Method(c); err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+
+    var resp response.ErrMsg
+    if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+        t.Fatalf("failed to unmarshal response: %v", err)
+    }
+
+    if resp.Code != response.ErrCodeOk {
+        t.Fatalf("expected code 0, got %d", resp.Code)
+    }
+
+    // Assert on resp.Data...
+
+    logOK(t, "响应内容: %s", rec.Body.String())
+}
+```
+
+- 必须使用 `httptest.NewRequest` + `echo.New().NewContext` 构造请求上下文
+- 成功场景校验 `resp.Code == response.ErrCodeOk`（即 0）
+- 失败场景校验 `resp.Code != response.ErrCodeOk` 且 `resp.Message` 非空
+- **每个测试用例最后一行**打印响应内容：`logOK(t, "响应内容: %s", rec.Body.String())`
+
+## Middleware / 集成测试
+
+```go
+func TestXxx(t *testing.T) {
+    e := echo.New()
+    e.Use(middleware.Xxx(...))
+    e.GET("/test", func(c *echo.Context) error {
+        return c.String(http.StatusOK, "ok")
+    })
+
+    req := httptest.NewRequest(http.MethodGet, "/test", nil)
+    rec := httptest.NewRecorder()
+    e.ServeHTTP(rec, req)
+
+    if rec.Code != http.StatusOK {
+        t.Fatalf("expected status 200, got %d", rec.Code)
+    }
+    // Assert headers via rec.Header().Get("X-Header")
+
+    logOK(t, "TestXxx PASS: status=%d", rec.Code)
+}
+```
+
+- 使用 `e.ServeHTTP(rec, req)` 测试完整中间件链
+- 响应头通过 `rec.Header().Get()` 获取
+- 响应体通过 `rec.Body.String()` 获取
+- 复杂 setup 逻辑提取为辅助函数（如 `newCORSApp(allowOrigins []string)`）
+
+## Model 测试
+
+```go
+func TestCreateXxx(t *testing.T) {
+    obj := &SomeModel{Field1: "val1", Field2: 123}
+    if err := CreateXxx(obj); err != nil {
+        t.Fatalf("CreateXxx failed: %v", err)
+    }
+    if obj.ID == 0 {
+        t.Error("expected ID to be set after create")
+    }
+    b, _ := json.MarshalIndent(obj, "", "  ")
+    logOK(t, "创建成功:\n%s", b)
+}
+```
+
+- 直接调用模型方法，验证返回值与数据库状态
+- 涉及数据库的测试需在 `TestMain` 中使用 `:memory:` 数据库并 `AutoMigrate`
+- 结果打印使用 `json.MarshalIndent` 格式化
+- **每个测试用例最后**打印成功结果：`logOK(t, "操作描述:\n%s", b)`
+
+## TestMain
+
+涉及数据库或全局初始化的测试包需定义 `TestMain`：
+
+```go
+func TestMain(m *testing.M) {
+    if err := model.InitDB(":memory:"); err != nil {
+        panic("failed to init test db: " + err.Error())
+    }
+    if err := model.DB.AutoMigrate(&model.User{}); err != nil {
+        panic("failed to migrate test db: " + err.Error())
+    }
+    code := m.Run()
+    os.Exit(code)
+}
+```
+
+## 运行测试
+
+```bash
+# 运行全部测试
+go test -v ./... -count=1
+
+# 运行特定包测试
+go test -v ./middle/... -count=1
+```
+
+- 提交前必须运行 `go test -v ./... -count=1` 确保全部通过
+- 使用 `-count=1` 禁用缓存，强制重新执行

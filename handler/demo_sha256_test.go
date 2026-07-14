@@ -30,7 +30,7 @@ func TestSha256Compute_Basic(t *testing.T) {
 		t.Fatalf("expected code 0, got %d", resp.Code)
 	}
 
-	data, ok := resp.Data.(map[string]interface{})
+	data, ok := resp.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("expected data to be map, got %T", resp.Data)
 	}
@@ -67,7 +67,7 @@ func TestSha256Compute_Chinese(t *testing.T) {
 		t.Fatalf("expected code 0, got %d", resp.Code)
 	}
 
-	data, ok := resp.Data.(map[string]interface{})
+	data, ok := resp.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("expected data to be map, got %T", resp.Data)
 	}
@@ -105,7 +105,7 @@ func TestSha256Compute_EmptyString(t *testing.T) {
 		t.Fatalf("expected code 0, got %d", resp.Code)
 	}
 
-	data, ok := resp.Data.(map[string]interface{})
+	data, ok := resp.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("expected data to be map, got %T", resp.Data)
 	}
@@ -169,7 +169,7 @@ func TestSha256Compute_SpecialChars(t *testing.T) {
 		t.Fatalf("expected code 0, got %d", resp.Code)
 	}
 
-	data, ok := resp.Data.(map[string]interface{})
+	data, ok := resp.Data.(map[string]any)
 	if !ok {
 		t.Fatalf("expected data to be map, got %T", resp.Data)
 	}
