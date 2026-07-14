@@ -23,3 +23,12 @@ GET {{host}}/demo/sha256?text=%E4%BD%A0%E5%A5%BD
 
 ### SHA256 哈希计算：缺失参数（应返回错误）
 GET {{host}}/demo/sha256
+
+### Common - 应用版本信息
+GET {{host}}/common/version
+
+### Common - 更新日志
+GET {{host}}/common/changelog
+
+### Common - 应用设置
+GET {{host}}/common/setting

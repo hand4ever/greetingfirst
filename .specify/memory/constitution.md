@@ -2,30 +2,19 @@
   ============================================================================
   Sync Impact Report
 
-  Version change: N/A (initial) → 1.0.0
-  Bump rationale: First constitution — establishes all principles from scratch.
+  Version change: 1.0.0 → 1.0.0 (no change)
+  Reason: Adding common router module does not modify any principles or sections.
+  All five principles remain applicable and unchanged.
 
-  Principles defined:
-    - I. 分层架构 (Layered Architecture)
-    - II. 统一响应格式 (Unified Response Format)
-    - III. 可复制为模板 (Copy-Ready Template)
-    - IV. 英文代码产物 (English-Only Code Artifacts)
-    - V. 测试覆盖 (Test Coverage)
-
-  Added sections:
-    - 技术栈约束 (Technology Stack)
-    - 开发流程 (Development Workflow)
-    - Governance
-
-  Removed sections: None (initial version).
+  Modified principles: None.
+  Added sections: None.
+  Removed sections: None.
 
   Templates requiring updates:
-    - .specify/templates/plan-template.md       ✅ no changes (Constitution Check is dynamic)
-    - .specify/templates/spec-template.md        ✅ no changes (no constitution-specific references)
-    - .specify/templates/tasks-template.md       ✅ no changes (path conventions filled at runtime)
-    - .specify/templates/checklist-template.md   ✅ no changes (generic template)
-    - .codebuddy/commands/speckit.constitution.md ✅ no changes (command definition, not project-specific)
-    - README.md                                  ✅ no changes (already aligned)
+    - .specify/templates/plan-template.md       ✅ no changes
+    - .specify/templates/spec-template.md        ✅ no changes
+    - .specify/templates/tasks-template.md       ✅ no changes
+    - .specify/templates/checklist-template.md   ✅ no changes
 
   Follow-up TODOs: None.
   ============================================================================

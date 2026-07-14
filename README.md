@@ -107,6 +107,9 @@ var corsConfig = middleware.CORSConfig{
 | GET | `/demo/search?tag=a&tag=b` | 接收多值查询参数 `tag` |
 | GET | `/demo/err/debug/:str` | 接收路径参数 `str` 并返回 |
 | GET | `/demo/sha256?text=hello` | 计算输入文本的 SHA256 哈希值，返回 `{input, hash}` |
+| GET | `/common/version` | 返回应用版本信息（版本号、构建时间、Go 版本） |
+| GET | `/common/changelog` | 返回应用更新日志列表 |
+| GET | `/common/setting` | 返回应用配置信息 |
 
 ## 本地开发
 
@@ -141,6 +144,7 @@ make buildqa
 | 2026-07-13 | 引入 GORM + SQLite：创建 `model/` 目录，全局 `model.DB` 实例，启动时自动初始化 |
 | 2026-07-13 | 新增 `/demo/sha256` 接口：接收 `text` 查询参数，返回 SHA256 哈希值及原始输入 |
 | 2026-07-14 | 新增 CORS 跨域支持：使用 Echo v5 内置中间件，默认允许所有来源，可配置域名、方法、请求头等 |
+| 2026-07-14 | 新增 `/common/*` 公共路由组：`/common/version`、`/common/changelog`、`/common/setting` |
 
 ---
 
