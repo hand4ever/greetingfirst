@@ -1,0 +1,34 @@
+# Greeting Application Configuration
+# This file is read at startup. Missing or invalid → falls back to defaults.
+
+[app]
+name = "Greeting"
+version = "0.1.0"
+build_time = "2026-07-14"
+
+[server]
+port = ":1323"
+
+[database]
+type = "sqlite"
+dsn = "greeting.db"
+
+[[changelog]]
+date = "2026-07-14"
+content = "Add common router with version, changelog, and setting endpoints"
+
+[[changelog]]
+date = "2026-07-13"
+content = "Introduce GORM + SQLite: global model.DB, auto-init on startup"
+
+[[changelog]]
+date = "2026-07-13"
+content = "Add /demo/sha256 endpoint for SHA256 hash computation"
+
+[[changelog]]
+date = "2026-07-04"
+content = "Implement request cost tracking middleware"
+
+[[changelog]]
+date = "2026-06-30"
+content = "Initialize project skeleton with layered architecture"

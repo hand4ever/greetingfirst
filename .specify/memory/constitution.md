@@ -2,19 +2,23 @@
   ============================================================================
   Sync Impact Report
 
-  Version change: 1.0.0 → 1.0.0 (no change)
-  Reason: Adding common router module does not modify any principles or sections.
-  All five principles remain applicable and unchanged.
+  Version change: 1.0.0 → 1.1.0
+  Reason: Adding Principle VI (Fail Fast) — error-throwing-first philosophy,
+  graceful degradation as explicitly designed opt-in only.
+  MINOR bump per SemVer: new principle added, no existing principles removed or redefined.
 
   Modified principles: None.
-  Added sections: None.
+  Added sections:
+    - VI. 错误及时抛出 (Fail Fast): default to explicit error/alert on failure,
+      silent degradation only when explicitly designed and tested.
   Removed sections: None.
 
   Templates requiring updates:
-    - .specify/templates/plan-template.md       ✅ no changes
-    - .specify/templates/spec-template.md        ✅ no changes
-    - .specify/templates/tasks-template.md       ✅ no changes
-    - .specify/templates/checklist-template.md   ✅ no changes
+    - .specify/templates/plan-template.md       ✅ no changes needed (Constitution Check is generic)
+    - .specify/templates/spec-template.md        ✅ no changes needed
+    - .specify/templates/tasks-template.md       ✅ no changes needed
+    - .specify/templates/checklist-template.md   ✅ no changes needed
+    - README.md                                  ⚠  updated: config error behavior description
 
   Follow-up TODOs: None.
   ============================================================================
@@ -104,6 +108,20 @@ type ErrMsg struct {
 
 **Rationale**: 测试是代码质量的最后防线，完整的测试覆盖让项目模板更可靠、更值得信赖。
 
+### VI. 错误及时抛出 (Fail Fast)
+
+所有错误处理 MUST 以显式抛出和告警为默认策略，静默降级为显式设计的例外：
+
+- 配置文件缺失或加载失败时，MUST 打印明确错误信息并以非零退出码终止启动
+- 外部依赖（数据库、外部服务等）连接失败时，MUST 显式报错而非使用默认值继续运行
+- 降级措施 ONLY 允许在以下条件下使用：
+  - 设计文档（spec.md）中明确约定了降级策略
+  - 降级行为有对应的测试用例覆盖
+- 未明确定义降级策略的错误场景，DEFAULT 按抛出错误 / 日志告警处理
+- 禁止使用 `_` 忽略 error 返回值；禁止无日志的静默吞错
+
+**Rationale**: 错误被静默吞掉会导致线上行为不可预期、运维排障困难。明确报错让问题在最早暴露、最容易定位的阶段被处理，是项目可靠性的基石。降级看似"健壮"，实则隐藏了真实故障。
+
 ## 技术栈约束
 
 本项目技术栈 MUST 在以下范围内选择，新增技术需评估必要性：
@@ -148,4 +166,4 @@ type ErrMsg struct {
 - **合规审查**：每次 `/speckit.plan` 执行时 MUST 检查 Constitution Check 门禁，违规需在 Complexity Tracking 中说明理由和替代方案
 - **运行时指导**：日常开发细节（命名、错误处理、注释规范等）详见 `.codebuddy/rules/GO_STYLE.mdc`
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-13
+**Version**: 1.1.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-14

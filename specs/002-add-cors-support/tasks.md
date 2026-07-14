@@ -1,12 +1,14 @@
 # Tasks: 添加 CORS 跨域支持
 
-**Input**: Design documents from `/specs/002-add-cors-support/`
+**Input**: Design documents from `specs/002-add-cors-support/`
 
 **Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, quickstart.md
 
-**Tests**: Included per project Constitution V (Test Coverage requirement).
+**Tests**: Tests are included — Constitution V requires test coverage for all features.
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing.
+
+**Status Note**: CORS middleware implementation is already complete in `main.go`. Tasks below focus on verification, remaining gap closure, and documentation.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -14,86 +16,86 @@
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2)
 - Include exact file paths in descriptions
 
-## Path Conventions
-
-- Project root: `/Users/bigbao/iproject/greeting/`
-- Go source files at repository root, `middle/`, `handler/`, etc.
-- Test files co-located with source files (e.g., `middle/cors_test.go`)
-
 ---
 
-## Phase 1: Setup (Shared Infrastructure)
+## Phase 1: Setup
 
-**Purpose**: No additional setup needed — project already initialized with Go + Echo v5. CORS uses built-in `middleware.CORS()` with zero new dependencies.
+**Purpose**: Verify project is ready for CORS feature validation
 
-> Skipped: Project structure, dependencies, and tooling already in place.
+- [X] T001 Verify Echo v5 CORS middleware import exists in `main.go` (should already have `github.com/labstack/echo/v5/middleware`)
+- [X] T002 Verify `corsConfig` variable is defined with correct defaults in `main.go` (AllowOrigins, AllowMethods, AllowHeaders, AllowCredentials, MaxAge)
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Define CORS configuration and register middleware in the global chain. This MUST complete before any user story testing can begin.
+**Purpose**: Confirm middleware registration order and basic structure before user story verification
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [x] T001 Define `corsConfig` CORS configuration variable with default values (AllowOrigins: `["*"]`, AllowMethods: `[GET,POST,PUT,DELETE,OPTIONS,PATCH,HEAD]`, AllowHeaders: `[Content-Type,Authorization,X-Requested-With,Accept,Origin]`, AllowCredentials: `false`, MaxAge: `86400`) in `main.go`
-- [x] T002 Register CORS middleware using `e.Use(middleware.CORSWithConfig(corsConfig))` in the global middleware chain in `main.go` — insert after `Recover`, before `RequestID`
+- [X] T003 Verify CORS middleware is registered in correct position in `main.go` (after Recover, before RequestID)
+- [X] T004 Verify `middle/cors_test.go` exists with `logOK` helper and `newCORSApp` test helper function
 
-**Checkpoint**: CORS middleware is active with default config. All routes now respond with CORS headers for cross-origin requests.
+**Checkpoint**: Foundation verified — user story verification can now begin
 
 ---
 
 ## Phase 3: User Story 1 - 前端跨域调用 API (Priority: P1) 🎯 MVP
 
-**Goal**: Frontend applications running on different origins can successfully call API endpoints via XMLHttpRequest/Fetch API. OPTIONS preflight requests return correct CORS headers, and actual requests include `Access-Control-Allow-Origin`.
+**Goal**: Frontend applications from different origins can call the API via cross-origin requests
 
-**Independent Test**: Start server, send curl requests simulating browser cross-origin behavior (OPTIONS preflight + GET with Origin), verify correct CORS response headers.
+**Independent Test**: Run `go test -v ./middle/... -count=1 -run "TestCORSPreflight|TestCORSGETWithOrigin|TestCORSSameOrigin|TestCORSOptionsWithoutRequestMethod"` and validate all pass
 
 ### Tests for User Story 1
 
-> **NOTE: Write these tests, ensure they PASS with the implemented CORS middleware**
+> **NOTE**: These tests already exist in `middle/cors_test.go`. Verify they pass.
 
-- [x] T003 [P] [US1] Create test file with `logOK` helper and `TestCORSPreflight` test (OPTIONS with valid Origin and `Access-Control-Request-Method`) in `middle/cors_test.go`
-- [x] T004 [P] [US1] Add `TestCORSGETWithOrigin` test (GET with Origin header returns `Access-Control-Allow-Origin`) in `middle/cors_test.go`
-- [x] T005 [P] [US1] Add `TestCORSSameOrigin` test (request without Origin header does NOT add CORS headers) in `middle/cors_test.go`
-- [x] T006 [US1] Add `TestCORSOptionsWithoutRequestMethod` test (OPTIONS without `Access-Control-Request-Method` header) in `middle/cors_test.go`
+- [X] T005 [P] [US1] Verify `TestCORSPreflight` test in `middle/cors_test.go` — OPTIONS + Origin + ACRM → 200/204 with CORS headers
+- [X] T006 [P] [US1] Verify `TestCORSGETWithOrigin` test in `middle/cors_test.go` — GET + Origin → response includes Access-Control-Allow-Origin
+- [X] T007 [P] [US1] Verify `TestCORSSameOrigin` test in `middle/cors_test.go` — no Origin → no CORS headers added
+- [X] T008 [P] [US1] Verify `TestCORSOptionsWithoutRequestMethod` test in `middle/cors_test.go` — OPTIONS + Origin without ACRM → handled gracefully
 
 ### Implementation for User Story 1
 
-> Implementation already completed in Phase 2 (T001, T002). CORS middleware with default config satisfies all US1 acceptance scenarios.
+- [X] T009 [US1] Confirm `corsConfig` in `main.go` has `AllowOrigins: []string{"*"}` for US1 default behavior (allow all origins)
+- [X] T010 [US1] Run `go test -v ./middle/... -count=1 -run TestCORS` and verify all 6 CORS tests pass
+- [X] T011 [US1] Run quickstart Scenarios 1-5 from `specs/002-add-cors-support/quickstart.md` against running server to validate end-to-end
 
-- [x] T007 [US1] Run `go test -v ./middle/... -count=1` and verify all CORS tests pass
-
-**Checkpoint**: User Story 1 fully functional. Cross-origin requests from any origin succeed with correct CORS headers. Same-origin requests remain unaffected.
+**Checkpoint**: User Story 1 verified — all cross-origin requests work correctly
 
 ---
 
 ## Phase 4: User Story 2 - 自定义允许的来源域名 (Priority: P2)
 
-**Goal**: Developers can configure specific allowed origin domains instead of wildcard `*`, improving production security. Only matched origins receive CORS headers.
+**Goal**: Operators can restrict CORS to specific origin domains for production security
 
-**Independent Test**: Configure specific allowed origin, verify matched origin gets `Access-Control-Allow-Origin`, unmatched origin does not.
+**Independent Test**: Run `go test -v ./middle/... -count=1 -run "TestCORSSpecificOriginAllowed|TestCORSSpecificOriginDisallowed"` and validate both pass
 
 ### Tests for User Story 2
 
-- [x] T008 [US2] Add `TestCORSSpecificOriginAllowed` and `TestCORSSpecificOriginDisallowed` tests (configure specific origin, verify allow/deny behavior) in `middle/cors_test.go`
+> **NOTE**: These tests already exist in `middle/cors_test.go`. Verify they pass.
+
+- [X] T012 [P] [US2] Verify `TestCORSSpecificOriginAllowed` test in `middle/cors_test.go` — matched origin receives correct CORS header
+- [X] T013 [P] [US2] Verify `TestCORSSpecificOriginDisallowed` test in `middle/cors_test.go` — unmatched origin receives no CORS headers
 
 ### Implementation for User Story 2
 
-> The config is already configurable via `corsConfig` variable (T001). US2 adds documentation and validation of the configuration pattern.
+- [X] T014 [US2] Confirm `corsConfig.AllowOrigins` in `main.go` is modifiable — user can change from `["*"]` to `["https://specific-domain.com"]` without touching middleware logic
+- [X] T015 [US2] Run quickstart Scenario 6 from `specs/002-add-cors-support/quickstart.md` (modify AllowOrigins, restart, verify disallowed origin gets no CORS header)
 
-- [x] T009 [US2] Document CORS configuration customization (modify `AllowOrigins`, `AllowMethods`, `AllowHeaders`, `AllowCredentials`) in `README.md` under a new "CORS 配置" section
-
-**Checkpoint**: User Story 2 complete. Users can modify `corsConfig` to restrict origins, and documentation explains how.
+**Checkpoint**: User Story 2 verified — specific origin restriction works correctly
 
 ---
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-**Purpose**: Final validation and quality assurance.
+**Purpose**: Documentation and final integration validation
 
-- [x] T010 Run full validation: `go fmt ./... && go build ./... && go test -v ./... -count=1`
-- [x] T011 Execute all 6 quickstart.md validation scenarios manually (or via `api_test.sh`) and confirm expected results
+- [X] T016 [P] Update `README.md` API 列表: add CORS middleware entry noting default config (allow all origins, no credentials)
+- [X] T017 [P] Update `api.http` or `api_test.sh`: add curl examples for CORS verification scenarios from quickstart.md
+- [X] T018 Run `go build ./...` to confirm project compiles cleanly
+- [X] T019 Run `go test -v ./... -count=1` to confirm all tests pass (including non-CORS tests)
+- [X] T020 Run `go fmt ./...` to ensure code formatting compliance
 
 ---
 
@@ -101,43 +103,48 @@
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)**: Skipped — project already initialized
-- **Foundational (Phase 2)**: No dependencies — start immediately. BLOCKS all user stories.
-- **User Story 1 (Phase 3)**: Depends on Foundational (Phase 2) completion
-- **User Story 2 (Phase 4)**: Depends on Foundational (Phase 2) completion. Independently testable from US1.
-- **Polish (Phase 5)**: Depends on all desired user stories being complete
+- **Setup (Phase 1)**: No dependencies — can start immediately
+- **Foundational (Phase 2)**: Depends on Setup completion — BLOCKS all user stories
+- **US1 (Phase 3)**: Depends on Foundational phase completion
+- **US2 (Phase 4)**: Depends on Foundational phase completion; independent of US1
+- **Polish (Phase 5)**: Depends on all user stories being verified
 
 ### User Story Dependencies
 
-- **User Story 1 (P1)**: Can start after Foundational (Phase 2) — No dependencies on other stories
-- **User Story 2 (P2)**: Can start after Foundational (Phase 2) — Uses same config but independently testable
+- **User Story 1 (P1)**: Can start after Foundational — No dependencies on US2
+- **User Story 2 (P2)**: Can start after Foundational — Independent of US1
 
 ### Within Each User Story
 
-- Tests should be written and verified against the already-implemented CORS middleware (Phase 2)
-- Test verification before moving to next story
-- Story complete before moving to next priority
+- Test verification tasks [P] can run in parallel
+- Implementation verification follows test verification
 
 ### Parallel Opportunities
 
-- T003, T004, T005 can be created in parallel (different test functions, same file but non-overlapping)
-- Once Foundational phase completes, US1 and US2 can proceed in parallel (if team capacity allows)
+- All Setup tasks (T001, T002) can run in parallel
+- All US1 test verification tasks (T005-T008) can run in parallel
+- All US2 test verification tasks (T012, T013) can run in parallel
+- Polish documentation tasks (T016, T017) can run in parallel
+- After Foundational phase, US1 and US2 can run in parallel (independently testable)
 
 ---
 
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch all independent test tasks for User Story 1 together:
-Task: "Create test file with logOK helper and TestCORSPreflight in middle/cors_test.go"
-Task: "Add TestCORSGETWithOrigin in middle/cors_test.go"
-Task: "Add TestCORSSameOrigin in middle/cors_test.go"
+# All US1 test verifications can run together:
+Task: "Verify TestCORSPreflight in middle/cors_test.go"
+Task: "Verify TestCORSGETWithOrigin in middle/cors_test.go"
+Task: "Verify TestCORSSameOrigin in middle/cors_test.go"
+Task: "Verify TestCORSOptionsWithoutRequestMethod in middle/cors_test.go"
+```
 
-# Then add the dependent test:
-Task: "Add TestCORSOptionsWithoutRequestMethod in middle/cors_test.go"
+## Parallel Example: User Story 2
 
-# Finally verify:
-Task: "Run go test -v ./middle/... -count=1"
+```bash
+# All US2 test verifications can run together:
+Task: "Verify TestCORSSpecificOriginAllowed in middle/cors_test.go"
+Task: "Verify TestCORSSpecificOriginDisallowed in middle/cors_test.go"
 ```
 
 ---
@@ -146,26 +153,28 @@ Task: "Run go test -v ./middle/... -count=1"
 
 ### MVP First (User Story 1 Only)
 
-1. Complete Phase 2: Foundational (T001, T002) — CORS middleware active
-2. Complete Phase 3: User Story 1 (T003-T007) — Tests validate core CORS behavior
-3. **STOP and VALIDATE**: All cross-origin requests work, tests pass
-4. Deploy/demo — MVP is ready
+1. Complete Phase 1: Setup (T001-T002)
+2. Complete Phase 2: Foundational (T003-T004)
+3. Complete Phase 3: User Story 1 (T005-T011)
+4. **STOP and VALIDATE**: Confirm all US1 tests pass + quickstart scenarios work
+5. CORS is now usable with default `*` origin policy
 
 ### Incremental Delivery
 
-1. Complete Foundational → CORS active with wildcard origin
-2. Add User Story 1 → Tests pass → Deploy/Demo (MVP!)
-3. Add User Story 2 → Specific origin tests pass → Documentation complete
-4. Each story adds value without breaking previous stories
+1. Setup + Foundational → Foundation verified
+2. Add User Story 1 → Test independently → MVP (allow all origins)
+3. Add User Story 2 → Test independently → Production-ready (specific origins)
+4. Polish → Documentation + full test run
 
-### Single Developer Strategy
+### Parallel Team Strategy
 
-Since this feature involves only 2 files (`main.go`, `middle/cors_test.go`) and 11 tasks, a single developer can complete all tasks sequentially:
+With multiple developers:
 
-1. T001 → T002 (Phase 2: ~5 min)
-2. T003 → T004 → T005 → T006 → T007 (Phase 3: ~15 min)
-3. T008 → T009 (Phase 4: ~10 min)
-4. T010 → T011 (Phase 5: ~5 min)
+1. Team completes Setup + Foundational together
+2. Once Foundational is done:
+   - Developer A: User Story 1 verification
+   - Developer B: User Story 2 verification
+3. Both stories verified independently, then merge
 
 ---
 
@@ -173,8 +182,8 @@ Since this feature involves only 2 files (`main.go`, `middle/cors_test.go`) and 
 
 - [P] tasks = different files, no dependencies
 - [Story] label maps task to specific user story for traceability
-- Each user story should be independently completable and testable
-- Commit after each task or logical group
+- Each user story is independently testable
+- CORS implementation code already exists in `main.go` and `middle/cors_test.go` — tasks verify correctness rather than build from scratch
+- Commit after each phase or logical group
 - Stop at any checkpoint to validate story independently
-- Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
-- CORS config is defined as a package-level variable in `main.go` — no separate config file needed per Constitution III (Copy-Ready Template)
+- All test verifications should be confirmed with `go test -v` output

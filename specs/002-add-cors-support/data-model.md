@@ -6,13 +6,13 @@
 
 This feature is a middleware-only enhancement and does not introduce any new data entities, database tables, or persistent state.
 
-## Configuration Constants
+## Configuration
 
-The following configuration values are defined as Go constants/variables for the CORS middleware:
+CORS configuration is defined as a package-level Go variable in `main.go`:
 
-| Name | Type | Description | Default |
-|------|------|-------------|---------|
-| `corsConfig` | `middleware.CORSConfig` | CORS middleware configuration struct | See defaults below |
+```go
+var corsConfig = middleware.CORSConfig{...}
+```
 
 ### CORSConfig Fields
 
@@ -27,3 +27,7 @@ The following configuration values are defined as Go constants/variables for the
 ## State Transitions
 
 No state involved — CORS is configured at startup and remains static for the lifetime of the server.
+
+## Relationship to config.toml
+
+The project has a `config.toml` file and `config/` package (from 003-config-file) handling application metadata, server port, database DSN, and changelog entries. CORS configuration is intentionally kept separate as Go constants in `main.go` rather than in `config.toml`, for compile-time safety and simplicity. This can be migrated to `config.toml` in the future if dynamic CORS configuration is needed.

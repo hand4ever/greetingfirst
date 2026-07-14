@@ -64,7 +64,7 @@
 - **FR-004**: 系统 MUST 支持配置允许的 HTTP 方法列表（如 GET、POST、PUT、DELETE、OPTIONS），默认为常用方法
 - **FR-005**: 系统 MUST 支持配置允许的请求头列表（如 Content-Type、Authorization），默认为常用头
 - **FR-006**: CORS 中间件 MUST 默认不启用凭证模式（`Access-Control-Allow-Credentials` 为 false），仅支持无凭证的简单跨域请求
-- **FR-007**: CORS 中间件 MUST 在全局中间件链中按正确顺序注册（应在 Recover 和 RequestID 之后，业务路由之前）
+- **FR-007**: CORS 中间件 MUST 在全局中间件链中按正确顺序注册（应在 Recover 之后、RequestID 之前，业务路由之前）
 - **FR-008**: CORS 中间件 MUST 对非跨域请求（无 Origin 头）保持透明，不添加多余的 CORS 响应头
 - **FR-009**: CORS 配置 MUST 支持通过常量或配置文件方式修改，保持项目作为模板的可复制性
 

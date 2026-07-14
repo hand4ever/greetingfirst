@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"greeting.first/config"
 	"greeting.first/middle"
 	"greeting.first/model"
 	"greeting.first/router"
@@ -21,6 +22,11 @@ var corsConfig = middleware.CORSConfig{
 }
 
 func main() {
+	// init config
+	if err := config.InitConfig("config.toml"); err != nil {
+		panic("failed to load config: " + err.Error())
+	}
+
 	// init database
 	if err := model.InitDB("greeting.db"); err != nil {
 		panic("failed to connect database: " + err.Error())

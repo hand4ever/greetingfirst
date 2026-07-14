@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	"github.com/labstack/echo/v5"
+	"greeting.first/config"
 	"greeting.first/entity/common"
 	"greeting.first/response"
 )
@@ -13,44 +14,37 @@ var Common = &_Common{}
 
 type _Common struct{}
 
-// default values, override via ldflags at build time
-var (
-	AppVersion = "0.1.0"
-	BuildTime  = "unknown"
-)
-
-// Version returns application version information.
+// Version returns application version information from config.
 func (*_Common) Version(c *echo.Context) error {
+	cfg := config.Cfg
 	return response.Ok(c, common.VersionResponse{
-		Version:   AppVersion,
-		BuildTime: BuildTime,
+		Version:   cfg.App.Version,
+		BuildTime: cfg.App.BuildTime,
 		GoVersion: runtime.Version(),
 	})
 }
 
-// changelog data (static, update as needed).
-var changelogData = []common.ChangelogEntry{
-	{Date: "2026-07-14", Content: "Add common router with version, changelog, and setting endpoints"},
-	{Date: "2026-07-13", Content: "Introduce GORM + SQLite: global model.DB, auto-init on startup"},
-	{Date: "2026-07-13", Content: "Add /demo/sha256 endpoint for SHA256 hash computation"},
-	{Date: "2026-07-04", Content: "Implement request cost tracking middleware"},
-	{Date: "2026-06-30", Content: "Initialize project skeleton with layered architecture"},
-}
-
-// Changelog returns the application changelog.
+// Changelog returns the application changelog from config.
 func (*_Common) Changelog(c *echo.Context) error {
-	return response.Ok(c, changelogData)
+	entries := make([]common.ChangelogEntry, 0, len(config.Cfg.Changelog))
+	for _, e := range config.Cfg.Changelog {
+		entries = append(entries, common.ChangelogEntry{
+			Date:    e.Date,
+			Content: e.Content,
+		})
+	}
+	return response.Ok(c, entries)
 }
 
-// setting data (static, update as needed).
-var settingData = []common.SettingItem{
-	{Key: "app_name", Value: "Greeting", Description: "Application name"},
-	{Key: "port", Value: ":1323", Description: "Server listen port"},
-	{Key: "db_type", Value: "sqlite", Description: "Database type"},
-	{Key: "db_dsn", Value: "greeting.db", Description: "Database DSN"},
-}
-
-// Setting returns the application settings.
+// Setting returns the application settings from config.
 func (*_Common) Setting(c *echo.Context) error {
-	return response.Ok(c, settingData)
+	cfg := config.Cfg
+	items := []common.SettingItem{
+		{Key: "app_name", Value: cfg.App.Name, Description: "Application name"},
+		{Key: "app_version", Value: cfg.App.Version, Description: "Application version"},
+		{Key: "server_port", Value: cfg.Server.Port, Description: "Server listen port"},
+		{Key: "db_type", Value: cfg.Database.Type, Description: "Database type"},
+		{Key: "db_dsn", Value: cfg.Database.DSN, Description: "Database DSN"},
+	}
+	return response.Ok(c, items)
 }

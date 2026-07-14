@@ -1,6 +1,6 @@
 # Research: CORS Middleware with Echo v5
 
-## Decision: Use Echo v5 built-in `middleware.CORS()`
+## Decision: Use Echo v5 built-in `middleware.CORSWithConfig()`
 
 **Rationale**: Echo v5 provides a production-ready CORS middleware in `github.com/labstack/echo/v5/middleware`. It handles all standard CORS behaviors: OPTIONS preflight, `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, `Access-Control-Max-Age`, and `Access-Control-Allow-Credentials`. Using the built-in middleware means zero new dependencies, which aligns with Constitution III (Copy-Ready Template).
 
@@ -17,12 +17,12 @@
 The middleware accepts `middleware.CORSConfig` with these relevant fields:
 
 ```go
-middleware.CORSConfig{
-    AllowOrigins:     []string{"*"},                          // FR-003: configurable origins
-    AllowMethods:     []string{http.MethodGet, ...},          // FR-004: configurable methods
-    AllowHeaders:     []string{"Content-Type", ...},          // FR-005: configurable headers
-    AllowCredentials: false,                                  // FR-006: credentials off by default
-    MaxAge:           86400,                                   // preflight cache duration
+var corsConfig = middleware.CORSConfig{
+    AllowOrigins:     []string{"*"},
+    AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPatch, http.MethodHead},
+    AllowHeaders:     []string{"Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"},
+    AllowCredentials: false,
+    MaxAge:           86400,
 }
 ```
 
@@ -36,17 +36,18 @@ middleware.CORSConfig{
 | `AllowCredentials` | `false` | Per clarification Q1: no credential mode by default |
 | `MaxAge` | `86400` (24 hours) | Standard preflight cache duration to reduce OPTIONS requests |
 
+### Config Storage Decision
+
+CORS configuration is stored as a Go package-level variable in `main.go`. The project now has a `config/` package with TOML support (from 003-config-file), but CORS config remains as Go constants for the following reasons:
+
+- **Compile-time safety**: Invalid CORS config would be caught at build time, not runtime
+- **Simplicity**: The CORS feature spec describes configuration via "constants or config file" — constants mode satisfies the requirement
+- **No additional dependency**: Does not require changes to `config.toml` or `config.Config` struct
+- **Future path**: If needed, CORS config can be migrated to `config.toml` as a `[cors]` section with a straightforward code change
+
 ### Middleware Registration Order
 
-Current middleware chain in `main.go`:
-```
-1. RequestLogger
-2. Recover
-3. RequestID
-4. CostTime
-```
-
-CORS middleware should be inserted after `Recover` (panic recovery should come before CORS) and before `RequestID` (so CORS headers are added early and present even for preflight):
+Middleware chain in `main.go`:
 
 ```
 1. RequestLogger
@@ -61,13 +62,15 @@ CORS middleware should be inserted after `Recover` (panic recovery should come b
 ## Test Strategy
 
 - Test file: `middle/cors_test.go`
-- Use `echo.New()` + `httptest.NewRequest` to simulate cross-origin requests
+- Use `newCORSApp()` helper to create Echo instance with CORS middleware
+- Use `e.ServeHTTP(rec, req)` for integration-level middleware testing
 - Test scenarios:
-  1. OPTIONS preflight with valid Origin → 200 with correct CORS headers
-  2. GET with Origin → response includes `Access-Control-Allow-Origin`
-  3. Same-origin request (no Origin) → no CORS headers added
-  4. OPTIONS without `Access-Control-Request-Method` → 200 without CORS headers
-  5. Disallowed origin → no `Access-Control-Allow-Origin` header
+  1. `TestCORSPreflight` — OPTIONS with Origin + ACRM → 200/204 with CORS headers
+  2. `TestCORSGETWithOrigin` — GET with Origin → response includes `Access-Control-Allow-Origin`
+  3. `TestCORSSameOrigin` — request without Origin → no CORS headers added
+  4. `TestCORSOptionsWithoutRequestMethod` — OPTIONS without ACRM → handled gracefully
+  5. `TestCORSSpecificOriginAllowed` — matched origin → receives correct CORS header
+  6. `TestCORSSpecificOriginDisallowed` — unmatched origin → no CORS headers
 
 ## Performance Impact
 

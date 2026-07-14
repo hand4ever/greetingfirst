@@ -9,6 +9,7 @@
 | 语言 | Go 1.26.3 |
 | Web 框架 | Echo v5.2.1 |
 | ORM | GORM v1.31.2 (SQLite) |
+| 配置文件 | TOML (`config.toml`) |
 | 模块名 | `greeting.first` |
 | 监听端口 | `:1323` |
 
@@ -19,6 +20,8 @@ greeting/
 ├── main.go            # 程序入口，初始化 Echo、注册中间件、启动服务
 ├── go.mod             # 模块定义与依赖
 ├── Makefile           # 本地运行 / 测试服部署脚本
+├── config.toml        # 全局配置文件（TOML 格式）
+├── config/            # 配置加载包（全局 Cfg 实例）
 ├── router/            # 路由分组与注册
 ├── handler/           # 请求处理（控制器层）
 ├── entity/            # 请求参数 / 数据实体定义
@@ -37,6 +40,7 @@ greeting/
 | `model/` | 数据库映射模型（GORM），通过 `model.DB` 访问全局实例 |
 | `response/` | 统一的成功 / 错误响应结构 |
 | `middle/` | 自定义中间件（耗时统计等） |
+| `config/` | 全局配置加载（TOML），通过 `config.Cfg` 访问 |
 
 ## 中间件
 
@@ -76,6 +80,43 @@ var corsConfig = middleware.CORSConfig{
 | 调整预检缓存 | 修改 `MaxAge` 值（单位：秒） |
 
 开发环境默认允许所有来源（`*`），生产环境部署时建议按需修改。
+
+## 配置文件
+
+项目使用 TOML 格式的全局配置文件 `config.toml`，在服务启动时自动加载。若文件缺失或格式错误，服务将打印错误信息并拒绝启动（遵循宪法原则 VI：错误及时抛出）。
+
+```toml
+[app]
+name = "Greeting"
+version = "0.1.0"
+build_time = "2026-07-14"
+
+[server]
+port = ":1323"
+
+[database]
+type = "sqlite"
+dsn = "greeting.db"
+
+[[changelog]]
+date = "2026-07-14"
+content = "Add common router with version, changelog, and setting endpoints"
+```
+
+**配置项说明**：
+
+| 段 | 字段 | 说明 |
+|----|------|------|
+| `[app]` | `name` | 应用名称 |
+| `[app]` | `version` | 应用版本号 |
+| `[app]` | `build_time` | 构建时间 |
+| `[server]` | `port` | 服务监听端口 |
+| `[database]` | `type` | 数据库类型 |
+| `[database]` | `dsn` | 数据库连接串 |
+| `[[changelog]]` | `date` | 更新日期 |
+| `[[changelog]]` | `content` | 更新内容 |
+
+修改配置后重启服务即可生效。
 
 ## 统一响应格式
 
@@ -145,6 +186,7 @@ make buildqa
 | 2026-07-13 | 新增 `/demo/sha256` 接口：接收 `text` 查询参数，返回 SHA256 哈希值及原始输入 |
 | 2026-07-14 | 新增 CORS 跨域支持：使用 Echo v5 内置中间件，默认允许所有来源，可配置域名、方法、请求头等 |
 | 2026-07-14 | 新增 `/common/*` 公共路由组：`/common/version`、`/common/changelog`、`/common/setting` |
+| 2026-07-14 | 新增全局配置文件 `config.toml`（TOML 格式），version/changelog/setting 改为从配置读取 |
 
 ---
 
@@ -152,6 +194,5 @@ make buildqa
 
 - [ ] 启用自定义错误处理器 `CustomHTTPErrorHandler`，补充 404/500 等错误页
 - [ ] 补充更多业务接口与路由分组
-- [ ] 增加配置管理（端口、环境变量等）
 - [ ] 增加单元测试
 - [ ] 完善 CI / 部署流程

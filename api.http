@@ -32,3 +32,19 @@ GET {{host}}/common/changelog
 
 ### Common - 应用设置
 GET {{host}}/common/setting
+
+### CORS - OPTIONS Preflight (模拟浏览器预检请求)
+OPTIONS {{host}}/demo/search
+Origin: https://example.com
+Access-Control-Request-Method: POST
+
+### CORS - GET with Origin (模拟跨域 GET 请求)
+GET {{host}}/demo/sha256?text=hello
+Origin: https://example.com
+
+### CORS - Same-Origin (无 Origin 头，同源请求)
+GET {{host}}/demo/sha256?text=hello
+
+### CORS - OPTIONS without Access-Control-Request-Method
+OPTIONS {{host}}/demo/sha256
+Origin: https://example.com

@@ -6,7 +6,7 @@
 
 - Go ≥ 1.22 installed
 - Project dependencies: `go mod tidy`
-- Server running on `http://localhost:1323`
+- Server running on `http://localhost:1323` (start with `go run .`)
 
 ## Validation Scenarios
 
@@ -22,7 +22,7 @@ curl -s -i -X OPTIONS \
 ```
 
 **Expected**: HTTP 200 (or 204). Response headers include:
-- `Access-Control-Allow-Origin: *` (or `https://example.com`)
+- `Access-Control-Allow-Origin: *`
 - `Access-Control-Allow-Methods` containing `POST`
 
 ---
@@ -37,7 +37,7 @@ curl -s -i \
   http://localhost:1323/demo/sha256?text=hello
 ```
 
-**Expected**: HTTP 200. Response headers include `Access-Control-Allow-Origin`.
+**Expected**: HTTP 200. Response headers include `Access-Control-Allow-Origin: *`.
 
 ---
 
@@ -55,7 +55,7 @@ curl -s -i http://localhost:1323/demo/sha256?text=hello
 
 ### Scenario 4: OPTIONS Without Access-Control-Request-Method
 
-Verify that OPTIONS without the proper preflight header is treated as a normal request.
+Verify that OPTIONS without the proper preflight header is handled gracefully.
 
 ```bash
 curl -s -i -X OPTIONS \
@@ -63,7 +63,7 @@ curl -s -i -X OPTIONS \
   http://localhost:1323/demo/sha256
 ```
 
-**Expected**: HTTP 200 (or 405, depending on route). No CORS-specific headers added.
+**Expected**: HTTP 200 (or 204). Echo CORS middleware still adds CORS headers as a safe default.
 
 ---
 
@@ -90,15 +90,24 @@ curl -s -i -X POST \
 
 ---
 
-### Scenario 6: Disallowed Origin (when configured with specific origins)
+### Scenario 6: Disallowed Origin (when AllowOrigins is specific)
 
-If CORS is configured with specific allowed origins, verify that disallowed origins are blocked.
+Modify `AllowOrigins` in `main.go` to `["https://myapp.com"]`, restart server, then:
 
 ```bash
-# Only applicable if AllowOrigins is set to a specific domain (e.g., "https://myapp.com")
 curl -s -i \
   -H "Origin: https://evil.com" \
   http://localhost:1323/demo/sha256?text=hello
 ```
 
 **Expected**: Response does NOT include `Access-Control-Allow-Origin` header (browser would block the response).
+
+---
+
+### Scenario 7: Run Unit Tests
+
+```bash
+go test -v ./middle/... -count=1 -run TestCORS
+```
+
+**Expected**: All 6 CORS test functions pass with `PASS` output.
