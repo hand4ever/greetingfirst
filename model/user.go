@@ -4,8 +4,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // LocalTime custom time type for JSON serialization in "2006-01-02 15:04:05" format.
@@ -50,13 +48,15 @@ func (t *LocalTime) Scan(v interface{}) error {
 
 // User maps to the users table.
 type User struct {
-	ID        uint           `gorm:"primaryKey" json:"id"`
-	Phone     string         `gorm:"type:varchar(32);not null" json:"phone"`
-	Name      string         `gorm:"type:varchar(64);not null" json:"name"`
-	Age       int            `gorm:"default:0" json:"age"`
-	CreatedAt LocalTime      `json:"created_at"`
-	UpdatedAt LocalTime      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	ID           int        `gorm:"primaryKey" json:"id"`
+	Phone        string     `gorm:"type:varchar(20);not null" json:"phone"`
+	Realname     string     `gorm:"type:varchar(100)" json:"realname"`
+	Username     string     `gorm:"type:varchar(20)" json:"username"`
+	Age          int        `gorm:"default:0" json:"age"`
+	PasswordHash string     `gorm:"type:varchar(200)" json:"-"`
+	CreatedAt    LocalTime  `json:"created_at"`
+	UpdatedAt    LocalTime  `json:"updated_at"`
+	DeletedAt    *time.Time `json:"-"`
 }
 
 // CreateUser inserts a new user.
@@ -64,20 +64,20 @@ func CreateUser(user *User) error {
 	return DB.Create(user).Error
 }
 
-// GetUserByID queries a user by id.
-func GetUserByID(id uint) (*User, error) {
+// GetUserByID queries a non-deleted user by id.
+func GetUserByID(id int) (*User, error) {
 	var user User
-	err := DB.First(&user, id).Error
+	err := DB.Where("id = ? AND deleted_at IS NULL", id).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-// GetUserByPhone queries a user by phone (non-deleted only).
+// GetUserByPhone queries a non-deleted user by phone.
 func GetUserByPhone(phone string) (*User, error) {
 	var user User
-	err := DB.Where("phone = ?", phone).First(&user).Error
+	err := DB.Where("phone = ? AND deleted_at IS NULL", phone).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,8 @@ func UpdateUser(user *User) error {
 	return DB.Save(user).Error
 }
 
-// DeleteUser soft-deletes a user by id.
-func DeleteUser(id uint) error {
-	return DB.Delete(&User{}, id).Error
+// DeleteUser soft-deletes a user by id (sets deleted_at = NOW()).
+func DeleteUser(id int) error {
+	now := time.Now()
+	return DB.Model(&User{}).Where("id = ?", id).Update("deleted_at", now).Error
 }

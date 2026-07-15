@@ -147,7 +147,7 @@ content = "Add common router with version, changelog, and setting endpoints"
 | GET | `/demo/err/debug/:str` | 接收路径参数 `str` 并返回 |
 | GET | `/demo/sha256?text=hello` | 计算输入文本的 SHA256 哈希值，返回 `{input, hash}` |
 | GET | `/demo/user/phone` | 按手机号查询用户，不存在则创建（测试用） |
-| POST | `/demo/usr` | 创建 MySQL 用户（name, phone, age） |
+| POST | `/demo/usr` | 创建 MySQL 用户（phone, realname, username, age） |
 | GET | `/demo/usr/:id` | 查询单个 MySQL 用户 |
 | PUT | `/demo/usr/:id` | 更新 MySQL 用户（部分字段） |
 | DELETE | `/demo/usr/:id` | 软删除 MySQL 用户 |
@@ -192,7 +192,7 @@ make buildqa
 | 2026-07-14 | 新增 `/common/*` 公共路由组：`/common/version`、`/common/changelog`、`/common/setting` |
 | 2026-07-14 | 新增全局配置文件 `config.toml`（TOML 格式），version/changelog/setting 改为从配置读取 |
 | 2026-07-15 | 新增 MySQL 数据库支持：`/demo/usr` CRUD 接口，独立 SQL 迁移脚本 |
-| 2026-07-15 | 简化为 MySQL 单数据库架构，移除所有旧 ORM 相关代码与配置 |
+| 2026-07-15 | User 模型审计：Name 拆分为 Realname+Username，新增 PasswordHash，Phone 长度修正为 varchar(20) |
 
 ---
 

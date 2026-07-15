@@ -24,7 +24,7 @@ func TestCreate_Success(t *testing.T) {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
 	e := echo.New()
-	body := map[string]any{"name": "张三", "phone": "13800000001", "age": 25}
+	body := map[string]any{"realname": "张三", "phone": "13800000001", "age": 25}
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest(http.MethodPost, "/demo/usr", bytes.NewReader(b))
 	req.Header.Set("Content-Type", "application/json")
@@ -46,12 +46,12 @@ func TestCreate_Success(t *testing.T) {
 	logOK(t, "Create_Success: %s", rec.Body.String())
 }
 
-func TestCreate_MissingName(t *testing.T) {
+func TestCreate_MissingPhone(t *testing.T) {
 	if model.DB == nil {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
 	e := echo.New()
-	body := map[string]any{"phone": "13800000002"}
+	body := map[string]any{"realname": "test"}
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest(http.MethodPost, "/demo/usr", bytes.NewReader(b))
 	req.Header.Set("Content-Type", "application/json")
@@ -68,9 +68,9 @@ func TestCreate_MissingName(t *testing.T) {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 	if resp.Code == response.ErrCodeOk {
-		t.Error("expected error for missing name")
+		t.Error("expected error for missing phone")
 	}
-	logOK(t, "Create_MissingName: %s", rec.Body.String())
+	logOK(t, "Create_MissingPhone: %s", rec.Body.String())
 }
 
 func TestCreate_DuplicatePhone(t *testing.T) {
@@ -81,7 +81,7 @@ func TestCreate_DuplicatePhone(t *testing.T) {
 	model.DB.Exec("DELETE FROM users")
 
 	e := echo.New()
-	body1 := map[string]any{"name": "dup1", "phone": "13800000003"}
+	body1 := map[string]any{"realname": "dup1", "phone": "13800000003"}
 	b1, _ := json.Marshal(body1)
 	req1 := httptest.NewRequest(http.MethodPost, "/demo/usr", bytes.NewReader(b1))
 	req1.Header.Set("Content-Type", "application/json")
@@ -93,7 +93,7 @@ func TestCreate_DuplicatePhone(t *testing.T) {
 	}
 
 	// create second user with same phone
-	body2 := map[string]any{"name": "dup2", "phone": "13800000003"}
+	body2 := map[string]any{"realname": "dup2", "phone": "13800000003"}
 	b2, _ := json.Marshal(body2)
 	req2 := httptest.NewRequest(http.MethodPost, "/demo/usr", bytes.NewReader(b2))
 	req2.Header.Set("Content-Type", "application/json")
@@ -123,7 +123,7 @@ func TestGet_Success(t *testing.T) {
 		t.Skip("MySQL not available")
 	}
 	// create a user first
-	u := &model.User{Phone: "13800000004", Name: "李四", Age: 30}
+	u := &model.User{Phone: "13800000004", Realname: "李四", Age: 30}
 	if err := model.CreateUser(u); err != nil {
 		t.Fatalf("setup: CreateUser failed: %v", err)
 	}
@@ -182,7 +182,7 @@ func TestUpdate_Success(t *testing.T) {
 	if model.DB == nil {
 		t.Skip("MySQL not available")
 	}
-	u := &model.User{Phone: "13800000005", Name: "王五", Age: 30}
+	u := &model.User{Phone: "13800000005", Realname: "王五", Age: 30}
 	if err := model.CreateUser(u); err != nil {
 		t.Fatalf("setup: CreateUser failed: %v", err)
 	}
@@ -190,7 +190,7 @@ func TestUpdate_Success(t *testing.T) {
 	e := echo.New()
 	newName := "王五改名"
 	newAge := 35
-	body, _ := json.Marshal(map[string]any{"name": newName, "age": newAge})
+	body, _ := json.Marshal(map[string]any{"realname": newName, "age": newAge})
 	req := httptest.NewRequest(http.MethodPut, "/demo/usr/"+fmt.Sprint(u.ID), bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -211,8 +211,8 @@ func TestUpdate_Success(t *testing.T) {
 	}
 
 	data := resp.Data.(map[string]any)
-	if data["name"] != "王五改名" {
-		t.Errorf("expected name 王五改名, got %v", data["name"])
+	if data["realname"] != "王五改名" {
+		t.Errorf("expected realname 王五改名, got %v", data["realname"])
 	}
 	if int(data["age"].(float64)) != 35 {
 		t.Errorf("expected age 35, got %v", data["age"])
@@ -225,7 +225,7 @@ func TestUpdate_NotFound(t *testing.T) {
 		t.Skip("MySQL not available")
 	}
 	e := echo.New()
-	body, _ := json.Marshal(map[string]any{"name": "test"})
+	body, _ := json.Marshal(map[string]any{"realname": "test"})
 	req := httptest.NewRequest(http.MethodPut, "/demo/usr/99999", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -251,14 +251,14 @@ func TestUpdate_PartialFields(t *testing.T) {
 	if model.DB == nil {
 		t.Skip("MySQL not available")
 	}
-	u := &model.User{Phone: "13800000006", Name: "赵六", Age: 20}
+	u := &model.User{Phone: "13800000006", Realname: "赵六", Age: 20}
 	if err := model.CreateUser(u); err != nil {
 		t.Fatalf("setup: CreateUser failed: %v", err)
 	}
 
 	e := echo.New()
 	// only update name, age not provided
-	body, _ := json.Marshal(map[string]any{"name": "赵六改名"})
+	body, _ := json.Marshal(map[string]any{"realname": "赵六改名"})
 	req := httptest.NewRequest(http.MethodPut, "/demo/usr/"+fmt.Sprint(u.ID), bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -279,8 +279,8 @@ func TestUpdate_PartialFields(t *testing.T) {
 	}
 
 	data := resp.Data.(map[string]any)
-	if data["name"] != "赵六改名" {
-		t.Errorf("expected name 赵六改名, got %v", data["name"])
+	if data["realname"] != "赵六改名" {
+		t.Errorf("expected realname 赵六改名, got %v", data["realname"])
 	}
 	// age should remain unchanged (20)
 	if int(data["age"].(float64)) != 20 {
@@ -297,7 +297,7 @@ func TestDelete_Success(t *testing.T) {
 	if model.DB == nil {
 		t.Skip("MySQL not available")
 	}
-	u := &model.User{Phone: "13800000007", Name: "孙七", Age: 40}
+	u := &model.User{Phone: "13800000007", Realname: "孙七", Age: 40}
 	if err := model.CreateUser(u); err != nil {
 		t.Fatalf("setup: CreateUser failed: %v", err)
 	}
@@ -390,8 +390,8 @@ func TestList_WithUsers(t *testing.T) {
 	}
 	model.DB.Exec("DELETE FROM users")
 
-	u1 := &model.User{Phone: "13800000008", Name: "用户1", Age: 20}
-	u2 := &model.User{Phone: "13800000009", Name: "用户2", Age: 25}
+	u1 := &model.User{Phone: "13800000008", Realname: "用户1", Age: 20}
+	u2 := &model.User{Phone: "13800000009", Realname: "用户2", Age: 25}
 	model.CreateUser(u1)
 	model.CreateUser(u2)
 
@@ -444,7 +444,7 @@ func TestCreate_Concurrent(t *testing.T) {
 			defer wg.Done()
 
 			e := echo.New()
-			body, _ := json.Marshal(map[string]any{"name": name, "phone": phone, "age": 20})
+			body, _ := json.Marshal(map[string]any{"realname": name, "phone": phone, "age": 20})
 			req := httptest.NewRequest(http.MethodPost, "/demo/usr", bytes.NewReader(body))
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()

@@ -54,7 +54,7 @@ POST {{host}}/demo/usr
 Content-Type: application/json
 
 {
-  "name": "张三",
+  "realname": "张三",
   "phone": "13800138000",
   "age": 25
 }
@@ -67,7 +67,7 @@ PUT {{host}}/demo/usr/1
 Content-Type: application/json
 
 {
-  "name": "张三丰",
+  "realname": "张三丰",
   "age": 30
 }
 

@@ -24,13 +24,14 @@ func (*_User) Create(c *echo.Context) error {
 	}
 
 	// validate required fields
-	if req.Name == "" || req.Phone == "" {
-		return response.NotOk(c, "name and phone are required")
+	if req.Phone == "" {
+		return response.NotOk(c, "phone is required")
 	}
 
 	u := &model.User{
-		Name:  req.Name,
-		Phone: req.Phone,
+		Phone:    req.Phone,
+		Realname: req.Realname,
+		Username: req.Username,
 	}
 	if req.Age != nil {
 		u.Age = *req.Age
@@ -43,14 +44,14 @@ func (*_User) Create(c *echo.Context) error {
 	return response.Ok(c, u)
 }
 
-// extractUserID extracts the :id path parameter as uint.
-func extractUserID(c *echo.Context) (uint, error) {
+// extractUserID extracts the :id path parameter as int.
+func extractUserID(c *echo.Context) (int, error) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return 0, err
 	}
-	return uint(id), nil
+	return id, nil
 }
 
 // Get handles GET /demo/usr/:id
@@ -92,8 +93,11 @@ func (*_User) Update(c *echo.Context) error {
 	}
 
 	// partial update: only update provided fields
-	if req.Name != nil {
-		u.Name = *req.Name
+	if req.Realname != nil {
+		u.Realname = *req.Realname
+	}
+	if req.Username != nil {
+		u.Username = *req.Username
 	}
 	if req.Age != nil {
 		u.Age = *req.Age

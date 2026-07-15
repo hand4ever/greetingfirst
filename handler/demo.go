@@ -44,9 +44,9 @@ func (*_Demo) GetUserByPhoneTest(c *echo.Context) error {
 	if err != nil {
 		// user not found, create a test user
 		user = &model.User{
-			Phone: testPhone,
-			Name:  "test_user",
-			Age:   25,
+			Phone:    testPhone,
+			Realname: "test_user",
+			Age:      25,
 		}
 		if err := model.CreateUser(user); err != nil {
 			return response.NotOk(c, "create test user failed: "+err.Error())

@@ -26,9 +26,9 @@ func TestCreateUser(t *testing.T) {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
 	user := &User{
-		Phone: "13900138000",
-		Name:  "MySQL张三",
-		Age:   28,
+		Phone:    "13900138000",
+		Realname: "MySQL张三",
+		Age:      28,
 	}
 	if err := CreateUser(user); err != nil {
 		t.Fatalf("CreateUser failed: %v", err)
@@ -44,11 +44,11 @@ func TestCreateUser_DuplicatePhone(t *testing.T) {
 	if DB == nil {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
-	user := &User{Phone: "13900001111", Name: "dup1", Age: 20}
+	user := &User{Phone: "13900001111", Realname: "dup1", Age: 20}
 	if err := CreateUser(user); err != nil {
 		t.Fatalf("first create should succeed: %v", err)
 	}
-	user2 := &User{Phone: "13900001111", Name: "dup2", Age: 30}
+	user2 := &User{Phone: "13900001111", Realname: "dup2", Age: 30}
 	if err := CreateUser(user2); err == nil {
 		t.Error("expected error for duplicate phone (active record)")
 	}
@@ -60,7 +60,7 @@ func TestGetUserByID(t *testing.T) {
 	if DB == nil {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
-	user := &User{Phone: "13900138001", Name: "MySQL李四", Age: 30}
+	user := &User{Phone: "13900138001", Realname: "MySQL李四", Age: 30}
 	if err := CreateUser(user); err != nil {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
@@ -69,8 +69,8 @@ func TestGetUserByID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetUserByID failed: %v", err)
 	}
-	if found.Name != "MySQL李四" {
-		t.Errorf("expected name MySQL李四, got %s", found.Name)
+	if found.Realname != "MySQL李四" {
+		t.Errorf("expected name MySQL李四, got %s", found.Realname)
 	}
 	if found.Phone != "13900138001" {
 		t.Errorf("expected phone 13900138001, got %s", found.Phone)
@@ -96,7 +96,7 @@ func TestGetUserByPhone(t *testing.T) {
 	if DB == nil {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
-	user := &User{Phone: "13900138002", Name: "MySQL王五", Age: 25}
+	user := &User{Phone: "13900138002", Realname: "MySQL王五", Age: 25}
 	if err := CreateUser(user); err != nil {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
@@ -105,8 +105,8 @@ func TestGetUserByPhone(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetUserByPhone failed: %v", err)
 	}
-	if found.Name != "MySQL王五" {
-		t.Errorf("expected name MySQL王五, got %s", found.Name)
+	if found.Realname != "MySQL王五" {
+		t.Errorf("expected name MySQL王五, got %s", found.Realname)
 	}
 	b, _ := json.MarshalIndent(found, "", "  ")
 	logOK(t, "MySQL 按手机号查询成功:\n%s", b)
@@ -126,12 +126,12 @@ func TestUpdateUser(t *testing.T) {
 	if DB == nil {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
-	user := &User{Phone: "13900138003", Name: "MySQL赵六", Age: 22}
+	user := &User{Phone: "13900138003", Realname: "MySQL赵六", Age: 22}
 	if err := CreateUser(user); err != nil {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
 
-	user.Name = "MySQL赵六改名"
+	user.Realname = "MySQL赵六改名"
 	user.Age = 35
 	if err := UpdateUser(user); err != nil {
 		t.Fatalf("UpdateUser failed: %v", err)
@@ -141,8 +141,8 @@ func TestUpdateUser(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetUserByID after update failed: %v", err)
 	}
-	if found.Name != "MySQL赵六改名" {
-		t.Errorf("expected name MySQL赵六改名, got %s", found.Name)
+	if found.Realname != "MySQL赵六改名" {
+		t.Errorf("expected name MySQL赵六改名, got %s", found.Realname)
 	}
 	if found.Age != 35 {
 		t.Errorf("expected age 35, got %d", found.Age)
@@ -155,7 +155,7 @@ func TestDeleteUser(t *testing.T) {
 	if DB == nil {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
-	user := &User{Phone: "13900138004", Name: "MySQL钱七", Age: 40}
+	user := &User{Phone: "13900138004", Realname: "MySQL钱七", Age: 40}
 	if err := CreateUser(user); err != nil {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
@@ -178,7 +178,7 @@ func TestPhoneReuseAfterSoftDelete(t *testing.T) {
 	if DB == nil {
 		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
 	}
-	user := &User{Phone: "13900138005", Name: "旧用户", Age: 30}
+	user := &User{Phone: "13900138005", Realname: "旧用户", Age: 30}
 	if err := CreateUser(user); err != nil {
 		t.Fatalf("CreateUser failed: %v", err)
 	}
@@ -188,7 +188,7 @@ func TestPhoneReuseAfterSoftDelete(t *testing.T) {
 	}
 
 	// On MySQL: same phone allowed after soft delete (generated column handles this)
-	user2 := &User{Phone: "13900138005", Name: "新用户", Age: 25}
+	user2 := &User{Phone: "13900138005", Realname: "新用户", Age: 25}
 	if err := CreateUser(user2); err != nil {
 		t.Logf("phone reuse blocked: %v", err)
 		return
