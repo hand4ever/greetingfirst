@@ -27,14 +27,9 @@ func main() {
 		panic("failed to load config: " + err.Error())
 	}
 
-	// init database: connect both MySQL and SQLite
-	if err := model.InitDB(config.Cfg.Database.MySQL.DSN, config.Cfg.Database.SQLite.DSN); err != nil {
+	// init database: connect to MySQL
+	if err := model.InitDB(config.Cfg.Database.MySQL.DSN); err != nil {
 		panic("failed to connect database: " + err.Error())
-	}
-
-	// ensure MySQL users table exists (pause-and-continue if missing)
-	if err := model.EnsureUserTable(model.DB, "mysql", 0); err != nil {
-		panic("failed to ensure mysql users table: " + err.Error())
 	}
 
 	e := echo.New()

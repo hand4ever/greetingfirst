@@ -20,6 +20,9 @@ import (
 // ============================================================================
 
 func TestCreate_Success(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
+	}
 	e := echo.New()
 	body := map[string]any{"name": "张三", "phone": "13800000001", "age": 25}
 	b, _ := json.Marshal(body)
@@ -44,6 +47,9 @@ func TestCreate_Success(t *testing.T) {
 }
 
 func TestCreate_MissingName(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
+	}
 	e := echo.New()
 	body := map[string]any{"phone": "13800000002"}
 	b, _ := json.Marshal(body)
@@ -68,6 +74,9 @@ func TestCreate_MissingName(t *testing.T) {
 }
 
 func TestCreate_DuplicatePhone(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available, skipping test (requires MySQL instance)")
+	}
 	// create first user
 	model.DB.Exec("DELETE FROM users")
 
@@ -110,6 +119,9 @@ func TestCreate_DuplicatePhone(t *testing.T) {
 // ============================================================================
 
 func TestGet_Success(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	// create a user first
 	u := &model.User{Phone: "13800000004", Name: "李四", Age: 30}
 	if err := model.CreateUser(u); err != nil {
@@ -138,6 +150,9 @@ func TestGet_Success(t *testing.T) {
 }
 
 func TestGet_NotFound(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/demo/usr/99999", nil)
 	rec := httptest.NewRecorder()
@@ -164,6 +179,9 @@ func TestGet_NotFound(t *testing.T) {
 // ============================================================================
 
 func TestUpdate_Success(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	u := &model.User{Phone: "13800000005", Name: "王五", Age: 30}
 	if err := model.CreateUser(u); err != nil {
 		t.Fatalf("setup: CreateUser failed: %v", err)
@@ -203,6 +221,9 @@ func TestUpdate_Success(t *testing.T) {
 }
 
 func TestUpdate_NotFound(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	e := echo.New()
 	body, _ := json.Marshal(map[string]any{"name": "test"})
 	req := httptest.NewRequest(http.MethodPut, "/demo/usr/99999", bytes.NewReader(body))
@@ -227,6 +248,9 @@ func TestUpdate_NotFound(t *testing.T) {
 }
 
 func TestUpdate_PartialFields(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	u := &model.User{Phone: "13800000006", Name: "赵六", Age: 20}
 	if err := model.CreateUser(u); err != nil {
 		t.Fatalf("setup: CreateUser failed: %v", err)
@@ -270,6 +294,9 @@ func TestUpdate_PartialFields(t *testing.T) {
 // ============================================================================
 
 func TestDelete_Success(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	u := &model.User{Phone: "13800000007", Name: "孙七", Age: 40}
 	if err := model.CreateUser(u); err != nil {
 		t.Fatalf("setup: CreateUser failed: %v", err)
@@ -303,6 +330,9 @@ func TestDelete_Success(t *testing.T) {
 }
 
 func TestDelete_NotFound(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodDelete, "/demo/usr/99999", nil)
 	rec := httptest.NewRecorder()
@@ -321,6 +351,9 @@ func TestDelete_NotFound(t *testing.T) {
 // ============================================================================
 
 func TestList_Empty(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	model.DB.Exec("DELETE FROM users")
 
 	e := echo.New()
@@ -352,6 +385,9 @@ func TestList_Empty(t *testing.T) {
 }
 
 func TestList_WithUsers(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	model.DB.Exec("DELETE FROM users")
 
 	u1 := &model.User{Phone: "13800000008", Name: "用户1", Age: 20}
@@ -392,6 +428,9 @@ func TestList_WithUsers(t *testing.T) {
 // ============================================================================
 
 func TestCreate_Concurrent(t *testing.T) {
+	if model.DB == nil {
+		t.Skip("MySQL not available")
+	}
 	model.DB.Exec("DELETE FROM users")
 
 	errCh := make(chan string, 10)
@@ -440,7 +479,7 @@ func TestCreate_Concurrent(t *testing.T) {
 	var count int64
 	model.DB.Model(&model.User{}).Count(&count)
 	if errs > 0 {
-		logOK(t, "TestCreate_Concurrent: %d concurrency errors (SQLite limit), %d users created", errs, count)
+		logOK(t, "TestCreate_Concurrent: %d concurrency errors, %d users created", errs, count)
 	} else {
 		if count != 10 {
 			t.Errorf("expected 10 concurrent creates, got %d", count)

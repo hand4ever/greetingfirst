@@ -2,25 +2,24 @@
   ============================================================================
   Sync Impact Report
 
-  Version change: 1.2.0 → 1.3.0
-  Reason: Adding pause-and-continue exception to Principle VI (table-missing
-  behavior) — a feature's spec may explicitly opt into a "remind+pause+wait"
-  mode instead of fail-fast exit, provided it still prohibits auto-create.
-  Principle VII is updated to reference this exception. MINOR bump per SemVer:
-  new exception clause added to existing principles without removing or
-  redefining their core semantics.
+  Version change: 1.3.0 → 1.3.1
+  Reason: Update tech stack table to reflect MySQL as current database, while
+  preserving multi-DB architecture flexibility. Remove SQLite-specific language
+  from Principle VII (test environment description). No principles added,
+  removed, or redefined. PATCH bump per SemVer: wording clarifications only.
 
   Modified principles:
-    - VI. 错误及时抛出 (Fail Fast): added "pause-and-continue" exception
-      clause for table-missing scenarios when a feature spec explicitly opts in.
-    - VII. 数据库表由用户创建 (User-Owned Schema): updated table-missing
-      reference to acknowledge the pause-and-continue variant.
+    - VII. 数据库表由用户创建 (User-Owned Schema): removed "（`:memory:`
+      SQLite 等）" hard reference, replaced with generic description.
   Added sections: None.
   Removed sections: None.
-  Templates requiring updates: None (generic gates unchanged).
-  Follow-up TODOs:
-    - specs/004-mysql-support/spec.md: FR-011 references amended constitution.
-    - specs/004-mysql-support/plan.md: Principle VI gate now PASS.
+  Modified tech stack: database row updated.
+  Templates requiring updates:
+    - .specify/templates/plan-template.md       ✅ no changes needed
+    - .specify/templates/spec-template.md        ✅ no changes needed
+    - .specify/templates/tasks-template.md       ✅ no changes needed
+    - .specify/templates/constitution-template.md ✅ no changes needed
+  Follow-up TODOs: None.
   ============================================================================
 -->
 <!--
@@ -165,7 +164,7 @@ type ErrMsg struct {
 - 禁止在 `InitDB` 或任何初始化路径中调用 `AutoMigrate` / 执行 `CREATE TABLE`
 - 数据库 schema 以独立的 `.sql` 迁移文件管理，作为项目可复制资产的一部分
 - 应用启动只需连接已存在表结构的数据库；表缺失默认 MUST 按 Principle VI 显式报错，而非自动补全。若某 feature 的 spec 显式约定 pause-and-continue 模式，则按该模式处理（仍禁止自动补全）
-- 测试环境（`:memory:` SQLite 等）MUST 在 `TestMain` 中执行相同的 schema SQL 脚本，保持与线上一致（见 Principle V）
+- 测试环境 MUST 在 `TestMain` 中执行与生产环境相同的 schema SQL 脚本，保持 schema 一致（见 Principle V）
 
 **Rationale**: 表结构属于数据资产，交由用户显式管理可避免 schema 漂移、隐式变更与环境不一致，也契合 Principle III（可复制为模板）与 Principle VI（错误及时抛出）——schema 的缺失应在最早阶段被明确暴露，而非被框架静默抹平。
 
@@ -178,7 +177,7 @@ type ErrMsg struct {
 | 语言 | Go | 版本 ≥ 1.22 |
 | Web 框架 | Echo v5 | 禁止混用其他 Web 框架 |
 | ORM | GORM v2 | 通过 `model.DB` 全局实例访问 |
-| 数据库 | SQLite（开发）/ 可替换 | 通过 DSN 注入切换，不绑死 SQLite |
+| 数据库 | MySQL / 可替换 | 通过 DSN 注入切换，架构支持多库并存 |
 | 模块名 | `greeting.first` | 待稳定后调整 |
 
 - 禁止引入与现有分层架构冲突的框架（如全栈框架替换 Echo）
@@ -213,4 +212,4 @@ type ErrMsg struct {
 - **合规审查**：每次 `/speckit.plan` 执行时 MUST 检查 Constitution Check 门禁，违规需在 Complexity Tracking 中说明理由和替代方案
 - **运行时指导**：日常开发细节（命名、错误处理、注释规范等）详见 `.codebuddy/rules/GO_STYLE.mdc`
 
-**Version**: 1.3.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-15
+**Version**: 1.3.1 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-15

@@ -27,19 +27,13 @@ type ServerConfig struct {
 	Port string `toml:"port"`
 }
 
-// DatabaseConfig holds database connection settings for MySQL and SQLite.
+// DatabaseConfig holds database connection settings.
 type DatabaseConfig struct {
-	MySQL  MySQLConfig  `toml:"mysql"`
-	SQLite SQLiteConfig `toml:"sqlite"`
+	MySQL MySQLConfig `toml:"mysql"`
 }
 
 // MySQLConfig holds MySQL connection settings.
 type MySQLConfig struct {
-	DSN string `toml:"dsn"`
-}
-
-// SQLiteConfig holds SQLite connection settings.
-type SQLiteConfig struct {
 	DSN string `toml:"dsn"`
 }
 
@@ -67,13 +61,11 @@ func defaultConfig() *Config {
 			MySQL: MySQLConfig{
 				DSN: "root:password@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local",
 			},
-			SQLite: SQLiteConfig{
-				DSN: "greeting.db",
-			},
 		},
 		Changelog: []ChangelogConfig{
+			{Date: "2026-07-15", Content: "Migrate to MySQL-only database architecture"},
+			{Date: "2026-07-15", Content: "Add MySQL CRUD endpoints (/demo/usr)"},
 			{Date: "2026-07-14", Content: "Add common router with version, changelog, and setting endpoints"},
-			{Date: "2026-07-13", Content: "Introduce GORM + SQLite: global model.DB, auto-init on startup"},
 			{Date: "2026-07-13", Content: "Add /demo/sha256 endpoint for SHA256 hash computation"},
 			{Date: "2026-07-04", Content: "Implement request cost tracking middleware"},
 			{Date: "2026-06-30", Content: "Initialize project skeleton with layered architecture"},

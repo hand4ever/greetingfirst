@@ -44,7 +44,6 @@ func (*_Common) Setting(c *echo.Context) error {
 		{Key: "app_version", Value: cfg.App.Version, Description: "Application version"},
 		{Key: "server_port", Value: cfg.Server.Port, Description: "Server listen port"},
 		{Key: "mysql_dsn", Value: cfg.Database.MySQL.DSN, Description: "MySQL connection string"},
-		{Key: "sqlite_dsn", Value: cfg.Database.SQLite.DSN, Description: "SQLite connection string"},
 	}
 	return response.Ok(c, items)
 }

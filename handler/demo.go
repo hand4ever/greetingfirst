@@ -39,17 +39,16 @@ func (*_Demo) ErrDebug(c *echo.Context) error {
 const testPhone = "13636311005"
 
 // GetUserByPhoneTest test-only: query user by phone, insert if not exists.
-// Migrated to use model.SQLiteDB + model.SQLiteUser.
 func (*_Demo) GetUserByPhoneTest(c *echo.Context) error {
-	user, err := model.GetSQLiteUserByPhone(testPhone)
+	user, err := model.GetUserByPhone(testPhone)
 	if err != nil {
 		// user not found, create a test user
-		user = &model.SQLiteUser{
+		user = &model.User{
 			Phone: testPhone,
 			Name:  "test_user",
 			Age:   25,
 		}
-		if err := model.CreateSQLiteUser(user); err != nil {
+		if err := model.CreateUser(user); err != nil {
 			return response.NotOk(c, "create test user failed: "+err.Error())
 		}
 		c.Logger().Info("<GetUserByPhoneTest> created test user", "id", user.ID, "phone", testPhone)

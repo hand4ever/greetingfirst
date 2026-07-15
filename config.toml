@@ -12,16 +12,17 @@ port = ":1323"
 [database.mysql]
 dsn = "root:@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local"
 
-[database.sqlite]
-dsn = "greeting.db"
+[[changelog]]
+date = "2026-07-15"
+content = "Migrate to MySQL-only database architecture"
+
+[[changelog]]
+date = "2026-07-15"
+content = "Add MySQL CRUD endpoints (/demo/usr)"
 
 [[changelog]]
 date = "2026-07-14"
 content = "Add common router with version, changelog, and setting endpoints"
-
-[[changelog]]
-date = "2026-07-13"
-content = "Introduce GORM + SQLite: global model.DB, auto-init on startup"
 
 [[changelog]]
 date = "2026-07-13"

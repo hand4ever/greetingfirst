@@ -9,7 +9,7 @@ GET {{host}}/demo/search?tag=go&tag=web&tag=api
 ### 调试接口：接收路径参数 str
 GET {{host}}/demo/err/debug/hello
 
-### 测试接口：通过手机号查询用户（13636311005）
+### 测试接口：通过手机号查询用户（MySQL），不存在则自动创建
 GET {{host}}/demo/user/phone
 
 ### SHA256 哈希计算：传入 text 参数返回 SHA256 哈希值
