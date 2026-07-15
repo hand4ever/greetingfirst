@@ -27,10 +27,20 @@ type ServerConfig struct {
 	Port string `toml:"port"`
 }
 
-// DatabaseConfig holds database settings.
+// DatabaseConfig holds database connection settings for MySQL and SQLite.
 type DatabaseConfig struct {
-	Type string `toml:"type"`
-	DSN  string `toml:"dsn"`
+	MySQL  MySQLConfig  `toml:"mysql"`
+	SQLite SQLiteConfig `toml:"sqlite"`
+}
+
+// MySQLConfig holds MySQL connection settings.
+type MySQLConfig struct {
+	DSN string `toml:"dsn"`
+}
+
+// SQLiteConfig holds SQLite connection settings.
+type SQLiteConfig struct {
+	DSN string `toml:"dsn"`
 }
 
 // ChangelogConfig represents a single changelog entry in config.
@@ -54,8 +64,12 @@ func defaultConfig() *Config {
 			Port: ":1323",
 		},
 		Database: DatabaseConfig{
-			Type: "sqlite",
-			DSN:  "greeting.db",
+			MySQL: MySQLConfig{
+				DSN: "root:password@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local",
+			},
+			SQLite: SQLiteConfig{
+				DSN: "greeting.db",
+			},
 		},
 		Changelog: []ChangelogConfig{
 			{Date: "2026-07-14", Content: "Add common router with version, changelog, and setting endpoints"},

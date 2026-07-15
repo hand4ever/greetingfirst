@@ -10,17 +10,45 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v5"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"greeting.first/model"
 	"greeting.first/response"
 )
 
 func TestMain(m *testing.M) {
-	// 使用内存数据库，避免污染本地数据
-	if err := model.InitDB(":memory:"); err != nil {
-		panic("failed to init test db: " + err.Error())
+	// init both DBs as in-memory SQLite for unit testing
+	var err error
+	model.DB, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
+	if err != nil {
+		panic("failed to init test DB (MySQL stub): " + err.Error())
 	}
-	if err := model.DB.AutoMigrate(&model.User{}); err != nil {
-		panic("failed to migrate test db: " + err.Error())
+	model.SQLiteDB, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
+	if err != nil {
+		panic("failed to init test SQLiteDB: " + err.Error())
+	}
+	if err := model.ApplySchema(model.SQLiteDB); err != nil {
+		panic("failed to apply schema: " + err.Error())
+	}
+	// create users table for MySQL handler tests (running against SQLite stub)
+	if err := model.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			phone VARCHAR(32) NOT NULL UNIQUE,
+			name VARCHAR(64) NOT NULL,
+			age INT DEFAULT 0,
+			created_at DATETIME,
+			updated_at DATETIME,
+			deleted_at DATETIME
+		);
+		CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users (deleted_at)
+	`).Error; err != nil {
+		panic("failed to create users table: " + err.Error())
 	}
 	code := m.Run()
 	os.Exit(code)
@@ -152,8 +180,8 @@ func TestErrDebug_ChineseStr(t *testing.T) {
 }
 
 func TestGetUserByPhoneTest_Create(t *testing.T) {
-	// 清空可能存在的软删除记录
-	model.DB.Exec("DELETE FROM users")
+	// clear any existing records
+	model.SQLiteDB.Exec("DELETE FROM sl_users")
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/demo/user/phone", nil)
@@ -190,7 +218,7 @@ func TestGetUserByPhoneTest_Create(t *testing.T) {
 }
 
 func TestGetUserByPhoneTest_Query(t *testing.T) {
-	// 用户已由上一个测试创建，应直接查询到
+	// user already created by the previous test, should be found directly
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/demo/user/phone", nil)
 	rec := httptest.NewRecorder()
@@ -207,51 +235,6 @@ func TestGetUserByPhoneTest_Query(t *testing.T) {
 	}
 	if body.Code != 0 {
 		t.Fatalf("expected code 0, got %d, message: %s", body.Code, body.Message)
-	}
-	logOK(t, "响应内容: %s", rec.Body.String())
-}
-
-func TestGetUserByPhoneTest_Restore(t *testing.T) {
-	// 先找到已创建的用户，再通过 GORM 软删除
-	user, err := model.GetUserByPhone("13636311005")
-	if err != nil {
-		t.Fatalf("failed to find user for restore test: %v", err)
-	}
-	if err := model.DeleteUser(user.ID); err != nil {
-		t.Fatalf("failed to soft-delete user: %v", err)
-	}
-
-	// 软删除后，handler 应尝试恢复该用户
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/demo/user/phone", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.Set("i_start_time", time.Now())
-
-	if err := Demo.GetUserByPhoneTest(c); err != nil {
-		t.Fatalf("GetUserByPhoneTest returned error: %v", err)
-	}
-
-	var body response.ErrMsg
-	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
-		t.Fatalf("failed to parse response: %v", err)
-	}
-	if body.Code != 0 {
-		t.Fatalf("expected code 0 (restored), got %d, message: %s", body.Code, body.Message)
-	}
-
-	data, ok := body.Data.(map[string]any)
-	if !ok {
-		t.Fatalf("data is not map: %T", body.Data)
-	}
-	if phone, ok := data["phone"].(string); !ok || phone != "13636311005" {
-		t.Errorf("expected phone=13636311005 after restore, got %v", data["phone"])
-	}
-	// 验证恢复的是同一用户
-	if id, ok := data["id"].(float64); ok {
-		if uint(id) != user.ID {
-			t.Errorf("expected restored user id=%d, got %d", user.ID, uint(id))
-		}
 	}
 	logOK(t, "响应内容: %s", rec.Body.String())
 }

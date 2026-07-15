@@ -48,3 +48,31 @@ GET {{host}}/demo/sha256?text=hello
 ### CORS - OPTIONS without Access-Control-Request-Method
 OPTIONS {{host}}/demo/sha256
 Origin: https://example.com
+
+### MySQL CRUD - 创建用户
+POST {{host}}/demo/usr
+Content-Type: application/json
+
+{
+  "name": "张三",
+  "phone": "13800138000",
+  "age": 25
+}
+
+### MySQL CRUD - 查询单个用户
+GET {{host}}/demo/usr/1
+
+### MySQL CRUD - 更新用户
+PUT {{host}}/demo/usr/1
+Content-Type: application/json
+
+{
+  "name": "张三丰",
+  "age": 30
+}
+
+### MySQL CRUD - 查询用户列表
+GET {{host}}/demo/usrs
+
+### MySQL CRUD - 删除用户
+DELETE {{host}}/demo/usr/1

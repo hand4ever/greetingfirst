@@ -38,22 +38,18 @@ func (*_Demo) ErrDebug(c *echo.Context) error {
 
 const testPhone = "13636311005"
 
-// GetUserByPhoneTest test-only: query user by phone, insert if not exists
+// GetUserByPhoneTest test-only: query user by phone, insert if not exists.
+// Migrated to use model.SQLiteDB + model.SQLiteUser.
 func (*_Demo) GetUserByPhoneTest(c *echo.Context) error {
-	user, err := model.GetUserByPhone(testPhone)
+	user, err := model.GetSQLiteUserByPhone(testPhone)
 	if err != nil {
-		// user not found (maybe soft-deleted), create a test user
-		user = &model.User{
+		// user not found, create a test user
+		user = &model.SQLiteUser{
 			Phone: testPhone,
 			Name:  "test_user",
 			Age:   25,
 		}
-		if err := model.CreateUser(user); err != nil {
-			// duplicate phone (soft-deleted record exists), restore it
-			if restored, restoreErr := model.RestoreUserByPhone(testPhone); restoreErr == nil {
-				c.Logger().Info("<GetUserByPhoneTest> restored test user", "id", restored.ID, "phone", testPhone)
-				return response.Ok(c, restored)
-			}
+		if err := model.CreateSQLiteUser(user); err != nil {
 			return response.NotOk(c, "create test user failed: "+err.Error())
 		}
 		c.Logger().Info("<GetUserByPhoneTest> created test user", "id", user.ID, "phone", testPhone)

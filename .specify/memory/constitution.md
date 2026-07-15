@@ -2,25 +2,60 @@
   ============================================================================
   Sync Impact Report
 
-  Version change: 1.0.0 → 1.1.0
-  Reason: Adding Principle VI (Fail Fast) — error-throwing-first philosophy,
-  graceful degradation as explicitly designed opt-in only.
-  MINOR bump per SemVer: new principle added, no existing principles removed or redefined.
+  Version change: 1.2.0 → 1.3.0
+  Reason: Adding pause-and-continue exception to Principle VI (table-missing
+  behavior) — a feature's spec may explicitly opt into a "remind+pause+wait"
+  mode instead of fail-fast exit, provided it still prohibits auto-create.
+  Principle VII is updated to reference this exception. MINOR bump per SemVer:
+  new exception clause added to existing principles without removing or
+  redefining their core semantics.
 
-  Modified principles: None.
-  Added sections:
-    - VI. 错误及时抛出 (Fail Fast): default to explicit error/alert on failure,
-      silent degradation only when explicitly designed and tested.
+  Modified principles:
+    - VI. 错误及时抛出 (Fail Fast): added "pause-and-continue" exception
+      clause for table-missing scenarios when a feature spec explicitly opts in.
+    - VII. 数据库表由用户创建 (User-Owned Schema): updated table-missing
+      reference to acknowledge the pause-and-continue variant.
+  Added sections: None.
   Removed sections: None.
+  Templates requiring updates: None (generic gates unchanged).
+  Follow-up TODOs:
+    - specs/004-mysql-support/spec.md: FR-011 references amended constitution.
+    - specs/004-mysql-support/plan.md: Principle VI gate now PASS.
+  ============================================================================
+-->
+<!--
+  ============================================================================
+  Sync Impact Report (historical)
 
+  Version change: 1.1.0 → 1.2.0
+  Reason: Adding Principle VII (User-Owned Schema) — database tables MUST be
+  created by the user via SQL migration scripts; the application MUST NOT
+  auto-create or auto-migrate schema at startup. This materially refines
+  Principle III (removed AutoMigrate-from-modules clause) and Principle V
+  (test setup now uses a SQL schema script instead of AutoMigrate).
+  MINOR bump per SemVer: new principle added + material refinement to existing
+  principles. (Prior 1.0.0→1.1.0: added Principle VI, no redefinitions.)
+
+  Modified principles:
+    - III. 可复制为模板: removed "(业务表 AutoMigrate 由各模块自行负责)",
+      now InitDB MUST NOT perform any table creation/migration.
+    - V. 测试覆盖: replaced "TestMain MUST call AutoMigrate" with
+      "TestMain MUST run a SQL schema script to init test tables".
+  Added sections:
+    - VII. 数据库表由用户创建 (User-Owned Schema)
+  Removed sections: None.
   Templates requiring updates:
-    - .specify/templates/plan-template.md       ✅ no changes needed (Constitution Check is generic)
+    - .specify/templates/plan-template.md       ✅ no changes needed (generic gate)
     - .specify/templates/spec-template.md        ✅ no changes needed
     - .specify/templates/tasks-template.md       ✅ no changes needed
-    - .specify/templates/checklist-template.md   ✅ no changes needed
-    - README.md                                  ⚠  updated: config error behavior description
-
-  Follow-up TODOs: None.
+    - .specify/templates/constitution-template.md ✅ no changes needed
+  Follow-up TODOs (manual, implementation phase):
+    - specs/004-mysql-support/spec.md: FR-008 + User Story 4 updated to
+      user-owned schema (done in this change).
+    - model/user_test.go:14 and handler/demo_test.go:22 TestMain MUST be
+      migrated from DB.AutoMigrate to a SQL schema script (per Principle V).
+    - A schema SQL file (e.g. migrations/001_user.sql) SHOULD be added as the
+      canonical, user-managed table definition.
   ============================================================================
 -->
 
@@ -75,7 +110,7 @@ type ErrMsg struct {
 本项目 MUST 保持自包含和最小化，确保可以直接复制到新项目使用：
 
 - 配置与业务逻辑分离，禁止硬编码项目特定值
-- `InitDB` MUST 仅连接数据库，不绑定业务表（业务表 AutoMigrate 由各模块自行负责）
+- `InitDB` MUST 仅连接数据库，不执行任何建表或迁移操作（表结构由用户通过 SQL 脚本手动创建，见 Principle VII）
 - 数据库连接 MUST 使用环境变量或配置文件注入 DSN，不使用硬编码路径
 - 项目结构中的基础能力（中间件、响应封装）MUST 保持通用，不包含业务特定逻辑
 - 新增依赖时 MUST 评估是否增加复制负担，优先使用标准库或轻量依赖
@@ -101,7 +136,7 @@ type ErrMsg struct {
 - 测试文件命名：`xxx_test.go`，与源文件同目录
 - Handler 测试：使用 `httptest.NewRequest` + `echo.New().NewContext` 构造请求
 - Model 测试：直接调用模型方法，使用内存数据库 `:memory:`
-- 每个测试文件 MUST 在 `TestMain` 中自行调用 `AutoMigrate` 建表
+- 每个测试文件 MUST 在 `TestMain` 中通过 SQL 建表脚本（如 `xxx_schema.sql`）初始化测试表，禁止使用 `AutoMigrate` 自动建表（见 Principle VII）
 - 测试输出 MUST 使用 `logOK` 辅助函数，确保无 `-v` 时也能看到响应内容
 - VSCode 测试配置 MUST 包含 `"go.testFlags": ["-v"]`
 - 运行命令：`go test -v ./... -count=1`
@@ -114,13 +149,25 @@ type ErrMsg struct {
 
 - 配置文件缺失或加载失败时，MUST 打印明确错误信息并以非零退出码终止启动
 - 外部依赖（数据库、外部服务等）连接失败时，MUST 显式报错而非使用默认值继续运行
+- 表结构缺失（目标数据库中不存在所需表）时，默认 MUST 显式报错退出，禁止自动建表补全（见 Principle VII）。例外：某 feature 的 spec 可显式约定「pause-and-continue」模式——应用打印提醒并暂停轮询，待用户建表后自动继续；该模式 MUST 仍禁止自动建表，且连接失败仍按默认 fail-fast 退出，不受此例外影响
 - 降级措施 ONLY 允许在以下条件下使用：
   - 设计文档（spec.md）中明确约定了降级策略
   - 降级行为有对应的测试用例覆盖
 - 未明确定义降级策略的错误场景，DEFAULT 按抛出错误 / 日志告警处理
 - 禁止使用 `_` 忽略 error 返回值；禁止无日志的静默吞错
 
-**Rationale**: 错误被静默吞掉会导致线上行为不可预期、运维排障困难。明确报错让问题在最早暴露、最容易定位的阶段被处理，是项目可靠性的基石。降级看似"健壮"，实则隐藏了真实故障。
+**Rationale**: 错误被静默吞掉会导致线上行为不可预期、运维排障困难。明确报错让问题在最早暴露、最容易定位的阶段被处理，是项目可靠性的基石。降级看似"健壮",实则隐藏了真实故障。
+
+### VII. 数据库表由用户创建 (User-Owned Schema)
+
+数据库表结构 MUST 由用户通过 SQL 脚本（迁移脚本）手动创建，应用 MUST NOT 在启动时自动创建或迁移表结构：
+
+- 禁止在 `InitDB` 或任何初始化路径中调用 `AutoMigrate` / 执行 `CREATE TABLE`
+- 数据库 schema 以独立的 `.sql` 迁移文件管理，作为项目可复制资产的一部分
+- 应用启动只需连接已存在表结构的数据库；表缺失默认 MUST 按 Principle VI 显式报错，而非自动补全。若某 feature 的 spec 显式约定 pause-and-continue 模式，则按该模式处理（仍禁止自动补全）
+- 测试环境（`:memory:` SQLite 等）MUST 在 `TestMain` 中执行相同的 schema SQL 脚本，保持与线上一致（见 Principle V）
+
+**Rationale**: 表结构属于数据资产，交由用户显式管理可避免 schema 漂移、隐式变更与环境不一致，也契合 Principle III（可复制为模板）与 Principle VI（错误及时抛出）——schema 的缺失应在最早阶段被明确暴露，而非被框架静默抹平。
 
 ## 技术栈约束
 
@@ -166,4 +213,4 @@ type ErrMsg struct {
 - **合规审查**：每次 `/speckit.plan` 执行时 MUST 检查 Constitution Check 门禁，违规需在 Complexity Tracking 中说明理由和替代方案
 - **运行时指导**：日常开发细节（命名、错误处理、注释规范等）详见 `.codebuddy/rules/GO_STYLE.mdc`
 
-**Version**: 1.1.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-14
+**Version**: 1.3.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-15

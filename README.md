@@ -8,7 +8,7 @@
 |------|------|
 | 语言 | Go 1.26.3 |
 | Web 框架 | Echo v5.2.1 |
-| ORM | GORM v1.31.2 (SQLite) |
+| ORM | GORM v1.31.2 (MySQL + SQLite) |
 | 配置文件 | TOML (`config.toml`) |
 | 模块名 | `greeting.first` |
 | 监听端口 | `:1323` |
@@ -111,8 +111,8 @@ content = "Add common router with version, changelog, and setting endpoints"
 | `[app]` | `version` | 应用版本号 |
 | `[app]` | `build_time` | 构建时间 |
 | `[server]` | `port` | 服务监听端口 |
-| `[database]` | `type` | 数据库类型 |
-| `[database]` | `dsn` | 数据库连接串 |
+| `[database.mysql]` | `dsn` | MySQL 连接串 |
+| `[database.sqlite]` | `dsn` | SQLite 连接串 |
 | `[[changelog]]` | `date` | 更新日期 |
 | `[[changelog]]` | `content` | 更新内容 |
 
@@ -148,6 +148,12 @@ content = "Add common router with version, changelog, and setting endpoints"
 | GET | `/demo/search?tag=a&tag=b` | 接收多值查询参数 `tag` |
 | GET | `/demo/err/debug/:str` | 接收路径参数 `str` 并返回 |
 | GET | `/demo/sha256?text=hello` | 计算输入文本的 SHA256 哈希值，返回 `{input, hash}` |
+| GET | `/demo/user/phone` | 按手机号查询 SQLite 用户（测试用） |
+| POST | `/demo/usr` | 创建 MySQL 用户（name, phone, age） |
+| GET | `/demo/usr/:id` | 查询单个 MySQL 用户 |
+| PUT | `/demo/usr/:id` | 更新 MySQL 用户（部分字段） |
+| DELETE | `/demo/usr/:id` | 软删除 MySQL 用户 |
+| GET | `/demo/usrs` | 查询 MySQL 用户列表 |
 | GET | `/common/version` | 返回应用版本信息（版本号、构建时间、Go 版本） |
 | GET | `/common/changelog` | 返回应用更新日志列表 |
 | GET | `/common/setting` | 返回应用配置信息 |
@@ -187,6 +193,7 @@ make buildqa
 | 2026-07-14 | 新增 CORS 跨域支持：使用 Echo v5 内置中间件，默认允许所有来源，可配置域名、方法、请求头等 |
 | 2026-07-14 | 新增 `/common/*` 公共路由组：`/common/version`、`/common/changelog`、`/common/setting` |
 | 2026-07-14 | 新增全局配置文件 `config.toml`（TOML 格式），version/changelog/setting 改为从配置读取 |
+| 2026-07-15 | 新增 MySQL 数据库支持：双数据库共存，`/demo/usr` CRUD 接口，独立 SQL 迁移脚本 |
 
 ---
 

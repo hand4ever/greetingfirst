@@ -11,4 +11,12 @@ func demo(e *echo.Echo) {
 	d.GET("/err/debug/:str", handler.Demo.ErrDebug)
 	d.GET("/user/phone", handler.Demo.GetUserByPhoneTest)
 	d.GET("/sha256", handler.Sha256.Compute)
+
+	// MySQL CRUD endpoints under /demo/usr
+	u := e.Group("/demo/usr")
+	u.POST("", handler.User.Create)
+	u.GET("/:id", handler.User.Get)
+	u.PUT("/:id", handler.User.Update)
+	u.DELETE("/:id", handler.User.Delete)
+	u.GET("s", handler.User.List) // /demo/usrs
 }

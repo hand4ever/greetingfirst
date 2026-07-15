@@ -43,8 +43,8 @@ func (*_Common) Setting(c *echo.Context) error {
 		{Key: "app_name", Value: cfg.App.Name, Description: "Application name"},
 		{Key: "app_version", Value: cfg.App.Version, Description: "Application version"},
 		{Key: "server_port", Value: cfg.Server.Port, Description: "Server listen port"},
-		{Key: "db_type", Value: cfg.Database.Type, Description: "Database type"},
-		{Key: "db_dsn", Value: cfg.Database.DSN, Description: "Database DSN"},
+		{Key: "mysql_dsn", Value: cfg.Database.MySQL.DSN, Description: "MySQL connection string"},
+		{Key: "sqlite_dsn", Value: cfg.Database.SQLite.DSN, Description: "SQLite connection string"},
 	}
 	return response.Ok(c, items)
 }

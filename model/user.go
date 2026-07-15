@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// LocalTime 自定义时间类型，JSON 序列化为 "2006-01-02 15:04:05" 格式
+// LocalTime custom time type for JSON serialization in "2006-01-02 15:04:05" format.
 type LocalTime time.Time
 
 const localTimeFormat = "2006-01-02 15:04:05"
@@ -30,12 +30,12 @@ func (t *LocalTime) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Value 实现 driver.Valuer，GORM 写入数据库时使用
+// Value implements driver.Valuer for GORM writes.
 func (t LocalTime) Value() (driver.Value, error) {
 	return time.Time(t), nil
 }
 
-// Scan 实现 sql.Scanner，GORM 从数据库读取时使用
+// Scan implements sql.Scanner for GORM reads.
 func (t *LocalTime) Scan(v interface{}) error {
 	if tv, ok := v.(time.Time); ok {
 		*t = LocalTime(tv)
@@ -44,10 +44,14 @@ func (t *LocalTime) Scan(v interface{}) error {
 	return fmt.Errorf("cannot scan %T into LocalTime", v)
 }
 
-// User table
+// ============================================================================
+// MySQL Entity: User
+// ============================================================================
+
+// User is the MySQL user entity (table: users).
 type User struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
-	Phone     string         `gorm:"uniqueIndex;type:varchar(32);not null" json:"phone"`
+	Phone     string         `gorm:"type:varchar(32);not null" json:"phone"`
 	Name      string         `gorm:"type:varchar(64);not null" json:"name"`
 	Age       int            `gorm:"default:0" json:"age"`
 	CreatedAt LocalTime      `json:"created_at"`
@@ -55,12 +59,12 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
-// CreateUser insert a new user
+// CreateUser inserts a new user into MySQL.
 func CreateUser(user *User) error {
 	return DB.Create(user).Error
 }
 
-// GetUserByID query user by id
+// GetUserByID queries a user by id from MySQL.
 func GetUserByID(id uint) (*User, error) {
 	var user User
 	err := DB.First(&user, id).Error
@@ -70,7 +74,7 @@ func GetUserByID(id uint) (*User, error) {
 	return &user, nil
 }
 
-// GetUserByPhone query user by phone
+// GetUserByPhone queries a user by phone from MySQL (non-deleted only).
 func GetUserByPhone(phone string) (*User, error) {
 	var user User
 	err := DB.Where("phone = ?", phone).First(&user).Error
@@ -80,26 +84,67 @@ func GetUserByPhone(phone string) (*User, error) {
 	return &user, nil
 }
 
-// UpdateUser update user fields
+// UpdateUser updates user fields in MySQL.
 func UpdateUser(user *User) error {
 	return DB.Save(user).Error
 }
 
-// DeleteUser soft-delete user by id
+// DeleteUser soft-deletes a user by id in MySQL.
 func DeleteUser(id uint) error {
 	return DB.Delete(&User{}, id).Error
 }
 
-// RestoreUserByPhone restore a soft-deleted user by phone
-func RestoreUserByPhone(phone string) (*User, error) {
-	var user User
-	err := DB.Unscoped().Where("phone = ?", phone).First(&user).Error
+// ============================================================================
+// SQLite Entity: SQLiteUser
+// ============================================================================
+
+// SQLiteUser is the SQLite user entity (table: sl_users, renamed from User).
+type SQLiteUser struct {
+	ID        uint           `gorm:"primaryKey" json:"id"`
+	Phone     string         `gorm:"type:varchar(32);not null" json:"phone"`
+	Name      string         `gorm:"type:varchar(64);not null" json:"name"`
+	Age       int            `gorm:"default:0" json:"age"`
+	CreatedAt LocalTime      `json:"created_at"`
+	UpdatedAt LocalTime      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// TableName overrides the default table name.
+func (SQLiteUser) TableName() string {
+	return "sl_users"
+}
+
+// CreateSQLiteUser inserts a new user into SQLite.
+func CreateSQLiteUser(user *SQLiteUser) error {
+	return SQLiteDB.Create(user).Error
+}
+
+// GetSQLiteUserByID queries a user by id from SQLite.
+func GetSQLiteUserByID(id uint) (*SQLiteUser, error) {
+	var user SQLiteUser
+	err := SQLiteDB.First(&user, id).Error
 	if err != nil {
 		return nil, err
 	}
-	user.DeletedAt = gorm.DeletedAt{}
-	if err := DB.Unscoped().Model(&user).Update("deleted_at", nil).Error; err != nil {
+	return &user, nil
+}
+
+// GetSQLiteUserByPhone queries a user by phone from SQLite (non-deleted only).
+func GetSQLiteUserByPhone(phone string) (*SQLiteUser, error) {
+	var user SQLiteUser
+	err := SQLiteDB.Where("phone = ?", phone).First(&user).Error
+	if err != nil {
 		return nil, err
 	}
 	return &user, nil
+}
+
+// UpdateSQLiteUser updates user fields in SQLite.
+func UpdateSQLiteUser(user *SQLiteUser) error {
+	return SQLiteDB.Save(user).Error
+}
+
+// DeleteSQLiteUser soft-deletes a user by id in SQLite.
+func DeleteSQLiteUser(id uint) error {
+	return SQLiteDB.Delete(&SQLiteUser{}, id).Error
 }

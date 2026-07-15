@@ -9,8 +9,10 @@ build_time = "2026-07-14"
 [server]
 port = ":1323"
 
-[database]
-type = "sqlite"
+[database.mysql]
+dsn = "root:@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local"
+
+[database.sqlite]
 dsn = "greeting.db"
 
 [[changelog]]
