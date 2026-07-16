@@ -1,92 +1,94 @@
-# Makefile Target Contracts
+# Makefile 目标契约(Contracts)
 
-**Feature**: 009-deploy-usr-shortcut
-**Date**: 2026-07-16
-**Version**: 2.0
+**功能(Feature)**: 009-deploy-usr-shortcut
+**日期(Date)**: 2026-07-16
+**版本(Version)**: 2.0
 
 > 本文档基于 007-optimize-makefile 的契约文档，记录本次变更涉及的目标契约。仅列出变更的目标；未变更目标（`help`、`rundev`、`fmt`、`lint`、`build`、`build-linux`、`test`、`clean`）的契约参见 [specs/007-optimize-makefile/contracts/makefile-targets.md](../../007-optimize-makefile/contracts/makefile-targets.md)。
 
 ---
 
-## Contract: `deploy-qa` (MODIFIED)
+## 契约(Contract): `deploy-qa`（修改(MODIFIED)）
 
-**Call**: `make deploy-qa [DEPLOY_HOST=<host>] [DEPLOY_USR=<user>] [DEPLOY_PATH=<path>] [DEPLOY_SUPERVISOR=<name>]`
+**调用(Call)**: `make deploy-qa [DEPLOY_HOST=<host>] [DEPLOY_USR=<user>] [DEPLOY_PATH=<path>] [DEPLOY_SUPERVISOR=<name>]`
 
-**Defaults**:
-| Variable | Default |
-|----------|---------|
+**默认值(Defaults)**:
+| 变量(Variable) | 默认值(Default) |
+|---------------|----------------|
 | `DEPLOY_HOST` | `111.229.4.203` |
 | `DEPLOY_USR` | `ubuntu` |
 | `DEPLOY_PATH` | `/opt/project/greeting` |
 | `DEPLOY_SUPERVISOR` | `greeting` |
 
-**Preconditions**: ssh/scp access configured for `$(DEPLOY_USR)@$(DEPLOY_HOST)`; all variables have defaults so zero-arg invocation works
+**前置条件(Preconditions)**: 已配置 `$(DEPLOY_USR)@$(DEPLOY_HOST)` 的 ssh/scp 访问权限；所有变量均有默认值，零参数调用即可运行
 
-**Behavior**:
-1. Validate required variables (`DEPLOY_HOST`, `DEPLOY_SUPERVISOR`)
-   - Triggered only if user explicitly unsets them; with defaults this should not occur in normal use
-2. Invoke `build-linux` (implicit dependency)
-3. Print: `Uploading to $(DEPLOY_HOST):$(DEPLOY_PATH)/ ...`
-4. Execute: `scp -O $(BIN_DIR)/$(BIN_NAME) $(DEPLOY_USR)@$(DEPLOY_HOST):$(DEPLOY_PATH)/`
-5. Print: `Restarting service $(DEPLOY_SUPERVISOR) on $(DEPLOY_HOST)...`
-6. Execute: `ssh $(DEPLOY_USR)@$(DEPLOY_HOST) "supervisorctl restart $(DEPLOY_SUPERVISOR)"`
-7. Print: `Deploy complete!`
+**行为(Behavior)**:
+1. 校验必需变量（`DEPLOY_HOST`、`DEPLOY_SUPERVISOR`）
+   - 仅当用户显式清空时触发；正常使用下默认值已填充，不会触发
+2. 调用 `build-linux`（隐式依赖）
+3. 输出：`Removing old binary on $(DEPLOY_HOST)...`
+4. 执行：`ssh $(DEPLOY_USR)@$(DEPLOY_HOST) "rm -f $(DEPLOY_PATH)/$(BIN_NAME)"`
+5. 输出：`Uploading to $(DEPLOY_HOST):$(DEPLOY_PATH)/ ...`
+6. 执行：`scp -O $(BIN_DIR)/$(BIN_NAME) $(DEPLOY_USR)@$(DEPLOY_HOST):$(DEPLOY_PATH)/`
+7. 输出：`Restarting service $(DEPLOY_SUPERVISOR) on $(DEPLOY_HOST)...`
+8. 执行：`ssh $(DEPLOY_USR)@$(DEPLOY_HOST) "sudo supervisorctl restart $(DEPLOY_SUPERVISOR)"`
+9. 输出：`Deploy complete!`
 
-**Changes from 007**:
+**变更说明(Changes from 007)**:
 
-| Component | 007 (Before) | 009 (After) |
-|-----------|-------------|-------------|
-| `DEPLOY_HOST` default | _(empty)_ | `111.229.4.203` |
-| `DEPLOY_USR` variable | _(not exist)_ | `ubuntu` |
-| `DEPLOY_PATH` default | `/opt/src/main` | `/opt/project/greeting` |
-| `DEPLOY_SUPERVISOR` default | _(empty)_ | `greeting` |
-| scp command | `root@$(DEPLOY_HOST)` | `$(DEPLOY_USR)@$(DEPLOY_HOST)` |
-| ssh command | `root@$(DEPLOY_HOST)` | `$(DEPLOY_USR)@$(DEPLOY_HOST)` |
-| Usage hint | `DEPLOY_HOST=<host> DEPLOY_SUPERVISOR=<name> [DEPLOY_PATH=<path>]` | `[DEPLOY_HOST=<host>] [DEPLOY_USR=<user>] [DEPLOY_PATH=<path>] [DEPLOY_SUPERVISOR=<name>]` |
+| 组件(Component) | 旧值(Before)（007） | 新值(After)（009） |
+|-----------------|-------------------|-------------------|
+| `DEPLOY_HOST` 默认值 | _(空)_ | `111.229.4.203` |
+| `DEPLOY_USR` 变量 | _(不存在)_ | `ubuntu` |
+| `DEPLOY_PATH` 默认值 | `/opt/src/main` | `/opt/project/greeting` |
+| `DEPLOY_SUPERVISOR` 默认值 | _(空)_ | `greeting` |
+| scp 命令 | `root@$(DEPLOY_HOST)` | `$(DEPLOY_USR)@$(DEPLOY_HOST)` |
+| ssh 命令 | `root@$(DEPLOY_HOST)` | `$(DEPLOY_USR)@$(DEPLOY_HOST)` |
+| 用法提示 | `DEPLOY_HOST=<host> DEPLOY_SUPERVISOR=<name> [DEPLOY_PATH=<path>]` | `[DEPLOY_HOST=<host>] [DEPLOY_USR=<user>] [DEPLOY_PATH=<path>] [DEPLOY_SUPERVISOR=<name>]` |
 
-**Parallel Execution**: 不提供锁机制（同 007）。
+**并行执行(Parallel Execution)**: 不提供锁机制（同 007）。
 
-**Exit codes**:
+**退出码(Exit codes)**:
 
-| Code | Meaning |
-|------|---------|
-| 0 | Deploy successful |
-| 1 | Pre-check failed or scp/ssh failed |
+| 退出码(Code) | 含义(Meaning) |
+|-------------|---------------|
+| 0 | 部署成功 |
+| 1 | 前置检查失败或 scp/ssh 失败 |
 
 ---
 
-## Contract: `runqa` (NEW)
+## 契约(Contract): `runqa`（新增(NEW)）
 
-**Call**: `make runqa [DEPLOY_HOST=<host>] [DEPLOY_USR=<user>] [DEPLOY_PATH=<path>] [DEPLOY_SUPERVISOR=<name>]`
+**调用(Call)**: `make runqa [DEPLOY_HOST=<host>] [DEPLOY_USR=<user>] [DEPLOY_PATH=<path>] [DEPLOY_SUPERVISOR=<name>]`
 
-**Preconditions**: Same as `deploy-qa` (all variables have QA defaults)
+**前置条件(Preconditions)**: 同 `deploy-qa`（所有变量均有 QA 默认值）
 
-**Behavior**:
-1. Invoke `deploy-qa` directly (no extra logic)
-2. All variable defaults and override behavior inherited from `deploy-qa`
+**行为(Behavior)**:
+1. 直接调用 `deploy-qa`（无额外逻辑）
+2. 所有变量默认值和覆盖行为继承自 `deploy-qa`
 
-**Equivalent to** (when no overrides):
+**等效于(Equivalent to)**（无覆盖时）:
 ```bash
 make deploy-qa
 ```
 
-**Override example**:
+**覆盖示例(Override example)**:
 ```bash
-# Override host only, keep other QA defaults
+# 仅覆盖 host，其余保持 QA 默认值
 make runqa DEPLOY_HOST=other-qa-server
 
-# Full custom deployment
+# 完全自定义部署
 make runqa DEPLOY_HOST=prod.example.com DEPLOY_USR=root DEPLOY_PATH=/app DEPLOY_SUPERVISOR=app
 ```
 
-**Exit codes**: Same as `deploy-qa` (inherited).
+**退出码(Exit codes)**: 同 `deploy-qa`（继承）。
 
 ---
 
-## Summary of Changes
+## 变更总结(Summary of Changes)
 
-| Contract | Status |
-|----------|--------|
-| `deploy-qa` | MODIFIED — variable defaults updated + 2 command lines (`root@` → `$(DEPLOY_USR)@`) + usage hint updated |
-| `runqa` | NEW — alias for `deploy-qa` |
-| All others | UNCHANGED — see 007 contracts |
+| 契约(Contract) | 状态(Status) |
+|---------------|-------------|
+| `deploy-qa` | 修改(MODIFIED) — 变量默认值更新 + 2 处命令（`root@` → `$(DEPLOY_USR)@`）+ 用法提示更新 |
+| `runqa` | 新增(NEW) — `deploy-qa` 的别名 |
+| 所有其他 | 未变更(UNCHANGED) — 参见 007 契约 |
