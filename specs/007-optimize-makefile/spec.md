@@ -39,7 +39,7 @@
 1. **Given** 项目代码已修改, **When** 开发者执行 `make fmt`, **Then** 自动格式化所有 Go 代码（通过 `gofumpt`），并报告有无格式问题
 2. **Given** 项目代码已修改, **When** 开发者执行 `make build`, **Then** 编译整个项目，编译通过无错误，编译失败则显示具体错误信息
 3. **Given** 项目代码已修改, **When** 开发者执行 `make test`, **Then** 运行所有单元测试并显示测试结果摘要（通过/失败数量）
-4. **Given** 开发者不确定 Makefile 有哪些可用命令, **When** 执行 `make help` 或仅执行 `make`, **Then** 显示所有可用目标的列表及简要说明
+4. **Given** 开发者不确定 Makefile 有哪些可用命令, **When** 执行 `make help` 或仅执行 `make`, **Then** 显示所有可用目标的列表及简要说明，说明使用中英双语格式（如 `编译项目 (Build binary)`）
 
 ---
 
@@ -69,7 +69,7 @@
 
 **Acceptance Scenarios**:
 
-1. **Given** 项目刚克隆到本地, **When** 开发者执行 `make` 或 `make help`, **Then** 展示所有可用目标列表，每个目标附有中文用途说明
+1. **Given** 项目刚克隆到本地, **When** 开发者执行 `make` 或 `make help`, **Then** 展示所有可用目标列表，每个目标附有中英双语的用途说明（如 `build        编译项目 (Build binary)`）
 2. **Given** Makefile 已包含所有目标, **When** 开发者执行 `make help`, **Then** 帮助信息按类别分组（如：开发、构建、测试、部署）
 
 ---
@@ -80,7 +80,7 @@
 - 当 `go.mod` 中定义的模块名与实际不一致时，`make build` 是否能给出清晰错误？
 - 当目标目录（如 `bin/`）不存在时，构建目标是否能自动创建？
 - 当 `gofumpt` 未安装时，`make fmt` 是否给出安装指引？
-- 当多开发者并行执行 `make deploy-qa` 时，是否可能出现冲突？如何处理？
+- 当多开发者并行执行 `make deploy-qa` 时，是否可能出现冲突？如何处理？→ **已澄清：接受风险，不处理。部署为低频操作，团队内部沟通即可避免并行冲突。**
 
 ## Requirements *(mandatory)*
 
@@ -92,7 +92,7 @@
 - **FR-004**: Makefile MUST 提供 `fmt` 目标，使用 `gofumpt` 格式化代码，若 `gofumpt` 不可用则回退到 `go fmt`
 - **FR-005**: Makefile MUST 提供 `lint` 目标，使用 `go vet ./...` 进行静态分析检查
 - **FR-006**: Makefile MUST 提供 `clean` 目标，清理编译产物（`bin/` 目录）
-- **FR-007**: Makefile MUST 提供 `help` 目标作为默认目标（`.DEFAULT_GOAL`），展示所有可用目标及其用途说明，按类别分组
+- **FR-007**: Makefile MUST 提供 `help` 目标作为默认目标（`.DEFAULT_GOAL`），展示所有可用目标及其用途说明，按类别分组；帮助文本使用中英双语格式（如 `build        编译项目 (Build binary)`）
 - **FR-008**: 部署目标（`deploy-qa`）MUST 从变量读取服务器 IP、端口、部署路径、supervisor 进程名，而非硬编码；变量缺失时 MUST 明确提示并终止
 - **FR-009**: 所有对外目标 MUST 声明 `.PHONY`，避免与同名文件冲突
 - **FR-010**: 构建目标 MUST 自动创建 `bin/` 输出目录（若不存在）
@@ -116,6 +116,13 @@
 - **SC-004**: `make test` 执行全部测试用例，失败时清晰标识失败用例名称
 - **SC-005**: 新开发者无需阅读 Makefile 源码，仅通过 `make help` 即可了解所有可用操作
 - **SC-006**: 部署目标在缺失必要配置时立即终止（不执行部分步骤），避免产生半完成部署状态
+
+## Clarifications
+
+### Session 2026-07-16
+
+- **Q: 并行部署冲突如何处理？** → **A: 接受风险，不处理。** 部署为低频操作，团队内部沟通即可避免并行冲突，无需引入锁机制增加复杂度。
+- **Q: 帮助文本（help targets）用中文还是英文？** → **A: 中英双语。** 帮助文本属于文档范畴，可使用中文；同时保留英文关键词方便开发者对照。格式：`build        编译项目 (Build binary)`。
 
 ## Assumptions
 

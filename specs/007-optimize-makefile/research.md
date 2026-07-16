@@ -138,38 +138,41 @@ endef
 **Alternatives considered**:
 - 使用默认值静默执行：rejected，IP 无法有合理默认值
 - 交互式提示输入：rejected，破坏自动化流程（CI/CD 不可用）
+- 锁文件机制防止并行部署冲突：rejected in clarification session，部署为低频操作，团队内部沟通即可避免，不引入不必要的复杂度
 
 ---
 
 ## R6: Help 目标设计
 
-**Decision**: `help` 设为 `.DEFAULT_GOAL`，使用 `@grep -E` 提取注释并按类别分组展示
+**Decision**: `help` 设为 `.DEFAULT_GOAL`，使用 `@grep -E` 提取注释并按类别分组展示；帮助文本使用中英双语格式（`中文 (English)`）
 
 **Rationale**:
 - 设置 `.DEFAULT_GOAL = help` 使无参数 `make` 等同于 `make help`
-- 使用连贯的注释格式 `## category: description` 实现自文档化
+- 使用连贯的注释格式 `## category: 中文描述 (English description)` 实现自文档化
 - 不需要手动维护目标列表，添加新目标时只需在注释中遵循格式
+- 中英双语格式：帮助文本属于文档范畴（Constitution IV 允许中文），同时保留英文关键词方便开发者对照
 
-**Self-documenting pattern**:
+**Self-documenting pattern with bilingual comments**:
 ```makefile
 .DEFAULT_GOAL := help
 
-help: ## help: Show available commands
+help: ## help: 显示帮助 (Show available commands)
 	@echo "Usage: make [target]"
 	@echo ""
-	@echo "Development:"
+	@echo "开发 (Development):"
 	@grep -E '^[a-zA-Z_-]+:.*?## dev:.*$$' $(firstword $(MAKEFILE_LIST)) | \
-		sed 's/## dev:/  make/' | sort
+		awk -F':.*?## dev: ' '{printf "  make %-15s %s\n", $$1, $$2}' | sort
 	@echo ""
-	@echo "Build:"
+	@echo "构建 (Build):"
 	@grep -E '^[a-zA-Z_-]+:.*?## build:.*$$' $(firstword $(MAKEFILE_LIST)) | \
-		sed 's/## build:/  make/' | sort
+		awk -F':.*?## build: ' '{printf "  make %-15s %s\n", $$1, $$2}' | sort
 	# ... other categories
 ```
 
 **Alternatives considered**:
 - 手写 help 文本：简单直接，但需双维护（写目标 + 写 help），容易不同步
 - 外部工具（如 `makehelp`）：引入额外依赖，违背简化原则
+- 纯中文 / 纯英文 help：rejected in clarification session，中英双语兼顾可读性和国际化
 
 ---
 

@@ -39,7 +39,7 @@
 | I. 分层架构 | N/A | Makefile 是构建工具配置，不属于应用分层代码 |
 | II. 统一响应格式 | N/A | Makefile 不涉及 API 响应 |
 | III. 可复制为模板 | ✅ PASS | 变量驱动设计，无硬编码 IP/路径，新项目可直接复用 |
-| IV. 英文代码产物 | ✅ PASS | Makefile 注释使用英文 |
+| IV. 英文代码产物 | ✅ PASS | Makefile 代码逻辑注释使用英文；help 目标描述注释使用中英双语（help 文本属文档范畴，Constitution IV 允许中文） |
 | V. 测试覆盖 | ✅ PASS | `make test` 目标正确执行 `go test -v ./... -count=1` |
 | VI. 错误及时抛出 | ✅ PASS | 部署目标缺配置时立即终止；构建/测试失败传播非零退出码 |
 | VII. 数据库表由用户创建 | N/A | Makefile 不涉及数据库操作 |

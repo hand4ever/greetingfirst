@@ -14,6 +14,7 @@
 | `help` | yes | none | FR-007 |
 
 - **Description**: Display all available make targets grouped by category
+- **Help Text Format**: 中英双语 — `编译项目 (Build binary)`
 - **Behavior**: Parses `Makefile` comments to extract and display target descriptions
 - **Default**: Set as `.DEFAULT_GOAL`, so bare `make` shows help
 

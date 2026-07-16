@@ -1,4 +1,4 @@
-# Specification Quality Checklist: 优化 Makefile
+# Specification Quality Checklist: 部署用户变量化与 QA 快捷目标
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-07-16
@@ -31,6 +31,7 @@
 
 ## Notes
 
-- All items passed validation. The spec is ready for `/speckit.plan`.
-- Go-specific commands (gofumpt, go vet, go test) are referenced as target behaviors, which is appropriate for a Makefile feature specification — the Makefile IS the product being specified.
-- **Clarification Session 2026-07-16**: 2 clarifications resolved — (1) 并行部署冲突：接受风险不处理，(2) 帮助文本语言：中英双语格式。Both integrated into spec.
+- All items pass. No [NEEDS CLARIFICATION] markers — both user requirements are unambiguous:
+  1. Add `DEPLOY_USR` variable (default `root`) to replace hardcoded `root@` in scp/ssh
+  2. Add `runqa` shortcut target with QA environment defaults
+- Spec assumes `007-optimize-makefile` has been completed; `deploy-qa` target exists with variable-driven design

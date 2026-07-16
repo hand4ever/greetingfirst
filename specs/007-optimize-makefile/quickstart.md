@@ -28,7 +28,8 @@ make help
 ```
 
 **Expected**:
-- All 8 targets displayed grouped by category (Development / Build / Test / Deploy)
+- All 8 targets displayed grouped by category (开发/Development、构建/Build、测试/Test、部署/Deploy)
+- Each target description uses 中英双语 format: `make fmt           格式化代码 (Format Go source code)`
 - Output appears in < 1 second
 
 ---

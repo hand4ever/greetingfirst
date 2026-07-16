@@ -1,4 +1,4 @@
-# Specification Quality Checklist: 优化 Makefile
+# Specification Quality Checklist: 更新 QA 部署目标机器
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-07-16
@@ -31,6 +31,6 @@
 
 ## Notes
 
-- All items passed validation. The spec is ready for `/speckit.plan`.
-- Go-specific commands (gofumpt, go vet, go test) are referenced as target behaviors, which is appropriate for a Makefile feature specification — the Makefile IS the product being specified.
-- **Clarification Session 2026-07-16**: 2 clarifications resolved — (1) 并行部署冲突：接受风险不处理，(2) 帮助文本语言：中英双语格式。Both integrated into spec.
+- All items passed validation. Spec is ready for `/speckit.plan`.
+- This feature is intentionally scoped narrowly: it only updates hardcoded deployment parameters in Makefile. The broader Makefile optimization is covered by `007-optimize-makefile`.
+- No [NEEDS CLARIFICATION] markers were needed; all deployment parameters are explicitly provided by the user.

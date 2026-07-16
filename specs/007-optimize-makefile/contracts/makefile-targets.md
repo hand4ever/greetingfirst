@@ -17,7 +17,8 @@
 **Behavior**:
 1. Print header: `Usage: make [target]`
 2. Print targets grouped by category using `## <category>: <description>` comment format
-3. Categories displayed in order: Development → Build → Test → Deploy
+3. Categories displayed in order: 开发 (Development) → 构建 (Build) → 测试 (Test) → 部署 (Deploy)
+4. Target descriptions use 中英双语 format: `中文描述 (English description)`
 
 **Exit codes**:
 
@@ -29,21 +30,21 @@
 ```
 Usage: make [target]
 
-Development:
-  make fmt           Format Go source code
-  make lint          Run static analysis (go vet)
-  make rundev        Start local development server
+开发 (Development):
+  make fmt           格式化代码 (Format Go source code)
+  make lint          静态分析 (Run static analysis via go vet)
+  make rundev        启动本地开发服务 (Start local development server)
 
-Build:
-  make build         Compile for current platform
-  make build-linux   Cross-compile for Linux amd64
-  make clean         Remove build artifacts
+构建 (Build):
+  make build         编译当前平台 (Compile for current platform)
+  make build-linux   交叉编译 Linux amd64 (Cross-compile for Linux amd64)
+  make clean         清理编译产物 (Remove build artifacts)
 
-Test:
-  make test          Run all unit tests
+测试 (Test):
+  make test          运行单元测试 (Run all unit tests)
 
-Deploy:
-  make deploy-qa     Build, upload, restart QA server
+部署 (Deploy):
+  make deploy-qa     编译、上传、重启 QA 服务 (Build, upload, restart QA server)
 ```
 
 ---
@@ -200,6 +201,8 @@ Deploy:
 5. Print: `Restarting service $(DEPLOY_SUPERVISOR) on $(DEPLOY_HOST)...`
 6. Execute: `ssh root@$(DEPLOY_HOST) "supervisorctl restart $(DEPLOY_SUPERVISOR)"`
 7. Print: `Deploy complete!`
+
+**Parallel Execution**: 不提供锁机制。部署为低频操作，团队内部沟通即可避免并行冲突（clarification decision: accept risk, no handling）.
 
 **Exit codes**:
 
