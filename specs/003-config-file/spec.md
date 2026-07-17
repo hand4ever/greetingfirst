@@ -61,6 +61,7 @@
 - **FR-007**: 配置结构体 MUST 定义为包级导出类型，方便其他模块读取
 - **FR-008**: 配置加载逻辑 MUST 提供 `InitConfig(configPath string)` 函数，支持通过参数指定路径（便于测试）
 - **FR-009**: (Deferred) 运行时通过命令行 `-config` flag 或环境变量 `CONFIG_PATH` 覆盖默认路径 — 当前硬编码 `"config.toml"`，后续迭代实现
+- **FR-010**: 服务启动监听端口 MUST 从配置文件 `[server] port` 读取并用于 `e.Start`，不得硬编码端口号
 
 ### Key Entities
 
@@ -78,6 +79,7 @@
 - **SC-002**: 缺失 `config.toml` 或格式错误时，进程以非零退出码终止，stderr 包含明确错误信息
 - **SC-003**: 全量单元测试通过，新增配置相关的测试用例
 - **SC-004**: 项目保持零外部依赖增长（TOML 库为标准 Go 模块生态，增量可控）
+- **SC-005**: 修改 `config.toml` 的 `[server] port` 后重启服务，服务监听新端口（验证 FR-010）
 
 ## Clarifications
 

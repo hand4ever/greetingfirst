@@ -22,6 +22,7 @@ var corsConfig = middleware.CORSConfig{
 }
 
 func main() {
+	e := echo.New()
 	// init config
 	if err := config.InitConfig("config.toml"); err != nil {
 		panic("failed to load config: " + err.Error())
@@ -29,15 +30,14 @@ func main() {
 
 	// init database: connect to MySQL
 	if err := model.InitDB(config.Cfg.Database.MySQL.DSN); err != nil {
-		panic("failed to connect database: " + err.Error())
+		// panic("failed to connect database: " + err.Error())
+		e.Logger.Error("failed to connect database", "error", err)
 	}
 
 	// init SQLite instance (coexists with MySQL), fail-fast on error
 	if err := model.InitSQLite(config.Cfg.Database.SQLite.DSN); err != nil {
 		panic("failed to connect sqlite: " + err.Error())
 	}
-
-	e := echo.New()
 
 	//e.HTTPErrorHandler = middle.CustomHTTPErrorHandler
 	e.Use(middleware.RequestLogger())
@@ -48,7 +48,8 @@ func main() {
 
 	router.Router(e)
 
-	if err := e.Start(":1323"); err != nil {
+	// start HTTP server on the port configured in [server].port (config.toml)
+	if err := e.Start(config.Cfg.Server.Port); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
 }

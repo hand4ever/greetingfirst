@@ -19,7 +19,7 @@ go run main.go
 
 **Expected**:
 - Log: `[config] loaded config from config.toml`
-- Service starts on `:1323`
+- Service starts on the port from `config.toml` `[server] port` (default `:1323`)
 - `GET /common/version` returns `version` from config
 - `GET /common/changelog` returns `[[changelog]]` entries from config
 - `GET /common/setting` returns `[app]`, `[server]`, `[database]` values from config

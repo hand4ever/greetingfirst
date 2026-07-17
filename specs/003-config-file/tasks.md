@@ -86,6 +86,16 @@
 
 ---
 
+## Phase 4.5: Startup Port From Config (FR-010 / SC-005)
+
+**Purpose**: Bind the HTTP server listen port to `config.Cfg.Server.Port` instead of a hardcoded value.
+
+- [x] T028 Wire `main.go` `e.Start` to `config.Cfg.Server.Port` so the listen port is read from `[server] port` in `config.toml`
+
+**Checkpoint**: Service listens on the configured port; changing `[server] port` and restarting binds the new port.
+
+---
+
 ## Phase 5: Polish & Cross-Cutting Concerns
 
 **Purpose**: Validation and cleanup.
