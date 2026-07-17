@@ -76,3 +76,31 @@ GET {{host}}/demo/usrs
 
 ### MySQL CRUD - 删除用户
 DELETE {{host}}/demo/usr/1
+
+### SQLite CRUD - 创建测试用户
+POST {{host}}/sqlite/testuser
+Content-Type: application/json
+
+{
+  "name": "张三",
+  "phone": "13900138000",
+  "age": 28
+}
+
+### SQLite CRUD - 查询单个测试用户
+GET {{host}}/sqlite/testuser/1
+
+### SQLite CRUD - 更新测试用户
+PUT {{host}}/sqlite/testuser/1
+Content-Type: application/json
+
+{
+  "name": "张三丰",
+  "age": 30
+}
+
+### SQLite CRUD - 查询测试用户列表
+GET {{host}}/sqlite/testusers
+
+### SQLite CRUD - 删除测试用户（软删除）
+DELETE {{host}}/sqlite/testuser/1

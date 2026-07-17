@@ -7,4 +7,5 @@ import (
 func Router(e *echo.Echo) {
 	demo(e)   // demo 相关
 	common(e) // common public components
+	sqlite(e) // SQLite 测试接口
 }

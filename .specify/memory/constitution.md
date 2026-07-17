@@ -2,6 +2,28 @@
   ============================================================================
   同步影响报告(Sync Impact Report)
 
+  版本变更(Version change): 1.3.3 → 1.4.0
+  原因(Reason): 新增原则 VIII（中文交互 / Chinese-First Interaction）——
+    要求 AI 助手面向用户的思考、分析与回答使用简体中文；明确声明本原则
+    不覆盖原则 IV 的英文代码产物要求（代码注释、commit message、导出
+    符号注释仍 MUST 使用英文）。MINOR 版本升级：新增原则。
+  修改的原则(Modified principles): 无（仅新增，未重定义既有原则）
+  新增章节(Added sections):
+    - VIII. 中文交互 (Chinese-First Interaction)
+  移除章节(Removed sections): 无
+  需更新的模板(Templates requiring updates):
+    - .specify/templates/plan-template.md         ✅ 无需更新
+      （Constitution Check 门禁按宪法文件动态生成，未硬编码原则列表）
+    - .specify/templates/spec-template.md          ✅ 无需更新
+    - .specify/templates/tasks-template.md         ✅ 无需更新
+    - .specify/templates/constitution-template.md  ✅ 无需更新
+  后续待办(Follow-up TODOs): 无
+  ============================================================================
+-->
+<!--
+  ============================================================================
+  同步影响报告(Sync Impact Report)
+
   版本变更(Version change): 1.3.2 → 1.3.3
   原因(Reason): (1) 澄清原则 I 中间件规则——原来"不阻断请求链"过于绝对，中间件
   遇致命错误时可通过不调用 next(c) 并直接返回错误响应来阻断请求链；(2) 中文化
@@ -211,6 +233,20 @@ type ErrMsg struct {
 
 **设计理由(Rationale)**: 表结构属于数据资产，交由用户显式管理可避免 schema 漂移、隐式变更与环境不一致，也契合 原则 III（可复制为模板）与原则 VI（错误及时抛出）——schema 的缺失应在最早阶段被明确暴露，而非被框架静默抹平。
 
+### VIII. 中文交互 (Chinese-First Interaction)
+
+所有面向用户的思考、分析与回答 MUST 使用简体中文：
+
+- AI 助手的内部推理、需求/计划分析、与用户的交互说明 MUST 使用简体中文
+- 错误提示、解释说明、状态报告、验证结论均使用中文
+- 规格文档（spec/plan/tasks 等）的叙述与标题使用中文（遵循模板规范）
+- 本原则仅约束交互与文档语言，**不覆盖**原则 IV 的英文代码产物要求：
+  代码注释、commit message、导出函数/类型注释仍 MUST 使用英文
+
+**设计理由(Rationale)**: 中文为团队主要沟通语言，确保开发者无需切换语境即可
+理解分析、决策与状态；代码产物仍保持英文以契合国际化与模板可复制性
+（原则 III / IV）。
+
 ## 技术栈约束
 
 本项目技术栈 MUST 在以下范围内选择，新增技术需评估必要性：
@@ -259,4 +295,4 @@ type ErrMsg struct {
 - **合规审查**：每次 `/speckit.plan` 执行时 MUST 检查 宪法检查(Constitution Check)门禁，违规需在复杂度追踪(Complexity Tracking)中说明理由和替代方案
 - **运行时指导**：日常开发细节（命名、错误处理、注释规范等）详见 `.codebuddy/rules/GO_STYLE.mdc`
 
-**版本(Version)**: 1.3.3 | **批准日期(Ratified)**: 2026-07-13 | **最后修订(Last Amended)**: 2026-07-16
+**版本(Version)**: 1.4.0 | **批准日期(Ratified)**: 2026-07-13 | **最后修订(Last Amended)**: 2026-07-17

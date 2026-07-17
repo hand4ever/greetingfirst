@@ -12,6 +12,9 @@ port = ":1323"
 [database.mysql]
 dsn = "root:@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local"
 
+[database.sqlite]
+dsn = "greeting.db"
+
 [[changelog]]
 date = "2026-07-15"
 content = "Migrate to MySQL-only database architecture"

@@ -32,6 +32,11 @@ func main() {
 		panic("failed to connect database: " + err.Error())
 	}
 
+	// init SQLite instance (coexists with MySQL), fail-fast on error
+	if err := model.InitSQLite(config.Cfg.Database.SQLite.DSN); err != nil {
+		panic("failed to connect sqlite: " + err.Error())
+	}
+
 	e := echo.New()
 
 	//e.HTTPErrorHandler = middle.CustomHTTPErrorHandler

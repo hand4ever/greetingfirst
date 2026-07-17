@@ -152,6 +152,11 @@ content = "Add common router with version, changelog, and setting endpoints"
 | PUT | `/demo/usr/:id` | 更新 MySQL 用户（部分字段） |
 | DELETE | `/demo/usr/:id` | 软删除 MySQL 用户 |
 | GET | `/demo/usrs` | 查询 MySQL 用户列表 |
+| POST | `/sqlite/testuser` | 创建 SQLite 测试用户（name, phone, age） |
+| GET | `/sqlite/testuser/:id` | 查询单个 SQLite 测试用户 |
+| PUT | `/sqlite/testuser/:id` | 更新 SQLite 测试用户（部分字段） |
+| DELETE | `/sqlite/testuser/:id` | 软删除 SQLite 测试用户 |
+| GET | `/sqlite/testusers` | 查询 SQLite 测试用户列表 |
 | GET | `/common/version` | 返回应用版本信息（版本号、构建时间、Go 版本） |
 | GET | `/common/changelog` | 返回应用更新日志列表 |
 | GET | `/common/setting` | 返回应用配置信息 |
@@ -193,6 +198,7 @@ make buildqa
 | 2026-07-14 | 新增全局配置文件 `config.toml`（TOML 格式），version/changelog/setting 改为从配置读取 |
 | 2026-07-15 | 新增 MySQL 数据库支持：`/demo/usr` CRUD 接口，独立 SQL 迁移脚本 |
 | 2026-07-15 | User 模型审计：Name 拆分为 Realname+Username，新增 PasswordHash，Phone 长度修正为 varchar(20) |
+| 2026-07-17 | 新增独立 SQLite 实例（`model.SQLiteDB`）与 `/sqlite/testuser` CRUD 测试接口，用户自管 `test_user` 表（宪法原则 VII：应用零自动建表） |
 
 ---
 

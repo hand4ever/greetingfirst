@@ -29,11 +29,17 @@ type ServerConfig struct {
 
 // DatabaseConfig holds database connection settings.
 type DatabaseConfig struct {
-	MySQL MySQLConfig `toml:"mysql"`
+	MySQL  MySQLConfig  `toml:"mysql"`
+	SQLite SQLiteConfig `toml:"sqlite"`
 }
 
 // MySQLConfig holds MySQL connection settings.
 type MySQLConfig struct {
+	DSN string `toml:"dsn"`
+}
+
+// SQLiteConfig holds SQLite connection settings (independent from MySQL).
+type SQLiteConfig struct {
 	DSN string `toml:"dsn"`
 }
 
@@ -60,6 +66,9 @@ func defaultConfig() *Config {
 		Database: DatabaseConfig{
 			MySQL: MySQLConfig{
 				DSN: "root:password@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local",
+			},
+			SQLite: SQLiteConfig{
+				DSN: "greeting.db",
 			},
 		},
 		Changelog: []ChangelogConfig{
