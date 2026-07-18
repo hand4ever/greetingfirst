@@ -2,7 +2,7 @@
 description: Greeting 项目开发约束
 alwaysApply: true
 enabled: true
-updatedAt: 2026-07-13T10:54:00.000Z
+updatedAt: 2026-07-18T00:00:00.000Z
 provider:
 ---
 
@@ -17,6 +17,13 @@ provider:
 3. 在 `router/` 中注册路由
 4. 在 `api.http` 中添加 REST Client 测试用例
 5. 在 `README.md` 的「API 列表」和「更新日志」中记录
+
+## Changelog 强制登记（重要）
+
+- **所有更改（新增功能、缺陷修复、配置调整、重构、文档/spec 变更等）与新增任务，MUST 在 changelog 中体现**，即 `GET /common/changelog` 接口的返回中必须可见本次变更。
+- 实现方式：在 `changelog.toml` 的 `[[changelog]]` 数组（独立文件，**不写入** `config.toml`）中**追加**一条记录，包含 `date`（格式 `YYYY-MM-DD`，使用当天日期）与 `content`（简洁描述变更内容）。
+- 若 `config.go` 的 `defaultConfig()` 默认 changelog 也需同步（保持与配置文件一致），否则配置文件缺失时接口内容会不一致。
+- 未登记 changelog 的改动视为**未完成**，提交前必须补齐。
 
 ## Git 规范
 

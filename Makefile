@@ -95,6 +95,7 @@ deploy-qa: build-linux ## deploy: 编译、上传、重启 QA 服务 (Build, upl
 	ssh $(DEPLOY_USR)@$(DEPLOY_HOST) "rm -f $(DEPLOY_PATH)/$(BIN_NAME)"
 	echo "Uploading to $(DEPLOY_HOST):$(DEPLOY_PATH)/ ..."
 	scp -O $(BIN_DIR)/$(BIN_NAME) $(DEPLOY_USR)@$(DEPLOY_HOST):$(DEPLOY_PATH)/
+	scp -O changelog.toml $(DEPLOY_USR)@$(DEPLOY_HOST):$(DEPLOY_PATH)/
 	echo "Restarting service $(DEPLOY_SUPERVISOR) on $(DEPLOY_HOST)..."
 	ssh $(DEPLOY_USR)@$(DEPLOY_HOST) "sudo supervisorctl restart $(DEPLOY_SUPERVISOR)"
 	echo "Deploy complete!"

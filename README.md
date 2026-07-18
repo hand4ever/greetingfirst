@@ -96,10 +96,7 @@ port = ":1323"
 
 [database.mysql]
 dsn = "root:@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local"
-
-[[changelog]]
-date = "2026-07-14"
-content = "Add common router with version, changelog, and setting endpoints"
+# NOTE: changelog is kept in a separate file `changelog.toml` (not here).
 ```
 
 **配置项说明**：
@@ -111,8 +108,8 @@ content = "Add common router with version, changelog, and setting endpoints"
 | `[app]` | `build_time` | 构建时间 |
 | `[server]` | `port` | 服务监听端口 |
 | `[database.mysql]` | `dsn` | MySQL 连接串 |
-| `[[changelog]]` | `date` | 更新日期 |
-| `[[changelog]]` | `content` | 更新内容 |
+| `changelog.toml` | `date` | 更新日志日期（独立文件，不写入 config.toml） |
+| `changelog.toml` | `content` | 更新日志内容 |
 
 修改配置后重启服务即可生效。
 

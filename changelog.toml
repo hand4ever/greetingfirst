@@ -1,0 +1,64 @@
+# Greeting Application Changelog
+# Kept in a separate file from config.toml and loaded at startup.
+# Missing or invalid → falls back to defaults defined in config.defaultConfig().
+# Append a new [[changelog]] entry for every change / new task.
+
+[[changelog]]
+date = "2026-07-18"
+content = "Add mandatory changelog registration rule: all changes and new tasks must appear in GET /common/changelog"
+
+[[changelog]]
+date = "2026-07-17"
+content = "Read server listen port from config.toml in main startup"
+
+[[changelog]]
+date = "2026-07-17"
+content = "Add independent SQLite instance and /sqlite/testuser CRUD test interface"
+
+[[changelog]]
+date = "2026-07-16"
+content = "Add project summary report for specs 001-009 with formatted PDF"
+
+[[changelog]]
+date = "2026-07-16"
+content = "Add missing spec templates and fix bilingual headers in 009 artifacts"
+
+[[changelog]]
+date = "2026-07-16"
+content = "Add DEPLOY_USR variable, runqa shortcut, sudo supervisorctl, and rm old binary before scp"
+
+[[changelog]]
+date = "2026-07-16"
+content = "Amend constitution to v1.3.3 (clarify middleware abort rule + text localization)"
+
+[[changelog]]
+date = "2026-07-16"
+content = "Localize speckit templates with Chinese(English) bilingual headings"
+
+[[changelog]]
+date = "2026-07-16"
+content = "Optimize Makefile with 9 documented targets, variable-driven config, and deploy guard"
+
+[[changelog]]
+date = "2026-07-15"
+content = "Migrate to MySQL-only database architecture"
+
+[[changelog]]
+date = "2026-07-15"
+content = "Add MySQL CRUD endpoints (/demo/usr)"
+
+[[changelog]]
+date = "2026-07-14"
+content = "Add common router with version, changelog, and setting endpoints"
+
+[[changelog]]
+date = "2026-07-13"
+content = "Add /demo/sha256 endpoint for SHA256 hash computation"
+
+[[changelog]]
+date = "2026-07-04"
+content = "Implement request cost tracking middleware"
+
+[[changelog]]
+date = "2026-06-30"
+content = "Initialize project skeleton with layered architecture"

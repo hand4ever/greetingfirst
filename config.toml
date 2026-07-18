@@ -1,5 +1,6 @@
 # Greeting Application Configuration
 # This file is read at startup. Missing or invalid → falls back to defaults.
+# NOTE: changelog is kept in a separate file `changelog.toml` (not here).
 
 [app]
 name = "Greeting"
@@ -14,27 +15,3 @@ dsn = "root:@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local"
 
 [database.sqlite]
 dsn = "greeting.db"
-
-[[changelog]]
-date = "2026-07-15"
-content = "Migrate to MySQL-only database architecture"
-
-[[changelog]]
-date = "2026-07-15"
-content = "Add MySQL CRUD endpoints (/demo/usr)"
-
-[[changelog]]
-date = "2026-07-14"
-content = "Add common router with version, changelog, and setting endpoints"
-
-[[changelog]]
-date = "2026-07-13"
-content = "Add /demo/sha256 endpoint for SHA256 hash computation"
-
-[[changelog]]
-date = "2026-07-04"
-content = "Implement request cost tracking middleware"
-
-[[changelog]]
-date = "2026-06-30"
-content = "Initialize project skeleton with layered architecture"
