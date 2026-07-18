@@ -24,6 +24,23 @@
   ============================================================================
   同步影响报告(Sync Impact Report)
 
+  版本变更(Version change): 1.4.0 → 1.5.0
+  原因(Reason): 在「开发流程」中新增"命令文件本地化(Command File Localization)"
+    规则——要求 `.codebuddy/commands/*.md` 始终保持中英文双语，并在任何
+    `speckit update` 之后 MUST 重新执行中文化、重新计算并写入
+    `codebuddy.manifest.json` 哈希。MINOR 版本升级：新增章节。
+  修改的原则(Modified principles): 无（仅新增，未重定义既有原则）
+  新增章节(Added sections):
+    - 开发流程 → 命令文件本地化(Command File Localization)
+  移除章节(Removed sections): 无
+  需更新的模板(Templates requiring updates): 无
+  后续待办(Follow-up TODOs): 无
+  ============================================================================
+-->
+<!--
+  ============================================================================
+  同步影响报告(Sync Impact Report)
+
   版本变更(Version change): 1.3.2 → 1.3.3
   原因(Reason): (1) 澄清原则 I 中间件规则——原来"不阻断请求链"过于绝对，中间件
   遇致命错误时可通过不调用 next(c) 并直接返回错误响应来阻断请求链；(2) 中文化
@@ -269,6 +286,19 @@ type ErrMsg struct {
 
 - 所有 spec.md / plan.md / tasks.md / research.md / quickstart.md / contracts/ 等规格产物 MUST 严格遵循 `.specify/templates/` 中对应模板的标题格式、层级结构和语言（中文标题 + 双语标注），禁止自行替换为纯英文标题或改变模板定义的章节结构
 
+命令文件本地化(Command File Localization)：
+
+- `.codebuddy/commands/*.md` 是 Spec Kit 上游安装命令定义，受
+  `.specify/integrations/codebuddy.manifest.json` 哈希锁定；这些文件 MUST
+  始终以中英文双语维护（标题使用 `## 中文(English)` 格式，正文用中文叙述、
+  关键术语保留英文括号标注），与原则 VIII 及模板规范保持一致
+- 对 `.codebuddy/commands/*.md` 完成中文化后，MUST 重新计算 10 个文件的
+  SHA256 并写回 `codebuddy.manifest.json` 的 `files` 字段，使哈希与本地化
+  状态一致，避免被工具误判为"脏(dirty)"
+- 任何 `speckit update`（或等效的集成更新）之后，上游可能以英文原版覆盖
+  本地命令文件；因此 MUST 在更新完成后立即重新执行中文化（逐文件翻译为
+  中英文双语）并重新更新 manifest 哈希，确保命令层语言策略与宪法一致
+
 新增接口 MUST 遵循以下流程：
 
 1. 在 `entity/<模块>/` 中定义请求参数结构体
@@ -295,4 +325,4 @@ type ErrMsg struct {
 - **合规审查**：每次 `/speckit.plan` 执行时 MUST 检查 宪法检查(Constitution Check)门禁，违规需在复杂度追踪(Complexity Tracking)中说明理由和替代方案
 - **运行时指导**：日常开发细节（命名、错误处理、注释规范等）详见 `.codebuddy/rules/GO_STYLE.mdc`
 
-**版本(Version)**: 1.4.0 | **批准日期(Ratified)**: 2026-07-13 | **最后修订(Last Amended)**: 2026-07-17
+**版本(Version)**: 1.5.0 | **批准日期(Ratified)**: 2026-07-13 | **最后修订(Last Amended)**: 2026-07-18

@@ -6,7 +6,7 @@ handoffs:
     prompt: Create a plan for the spec. I am building with...
 ---
 
-## User Input
+## 用户输入(User Input)
 
 ```text
 $ARGUMENTS
@@ -14,20 +14,20 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## Pre-Execution Checks
+## 执行前检查(Pre-Execution Checks)
 
-**Check for extension hooks (before clarification)**:
+**Check for extension hooks (before clarification / 澄清前的扩展钩子检查)**:
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_clarify` key
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
 - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
-  - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
+  - If the hook has no `condition` field, or it is null/empty, treat it as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
 - For each executable hook, output the following based on its `optional` flag:
-  - **Optional hook** (`optional: true`):
+  - **Optional hook** (`optional: true` / 可选钩子):
     ```
-    ## Extension Hooks
+    ## 扩展钩子(Extension Hooks)
 
     **Optional Pre-Hook**: {extension}
     Command: `/{command}`
@@ -36,9 +36,9 @@ You **MUST** consider the user input before proceeding (if not empty).
     Prompt: {prompt}
     To execute: `/{command}`
     ```
-  - **Mandatory hook** (`optional: false`):
+  - **Mandatory hook** (`optional: false` / 强制钩子):
     ```
-    ## Extension Hooks
+    ## 扩展钩子(Extension Hooks)
 
     **Automatic Pre-Hook**: {extension}
     Executing: `/{command}`
@@ -49,7 +49,7 @@ You **MUST** consider the user input before proceeding (if not empty).
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
-## Outline
+## 大纲(Outline)
 
 Goal: Detect and reduce ambiguity or missing decision points in the active feature specification and record the clarifications directly in the spec file.
 
@@ -68,23 +68,23 @@ Execution steps:
 
 3. Load the current spec file. Perform a structured ambiguity & coverage scan using this taxonomy. For each category, mark status: Clear / Partial / Missing. Produce an internal coverage map used for prioritization (do not output raw map unless no questions will be asked).
 
-   Functional Scope & Behavior:
+   **功能范围与行为(Functional Scope & Behavior)**:
    - Core user goals & success criteria
    - Explicit out-of-scope declarations
    - User roles / personas differentiation
 
-   Domain & Data Model:
+   **领域与数据模型(Domain & Data Model)**:
    - Entities, attributes, relationships
    - Identity & uniqueness rules
    - Lifecycle/state transitions
    - Data volume / scale assumptions
 
-   Interaction & UX Flow:
+   **交互与用户体验流程(Interaction & UX Flow)**:
    - Critical user journeys / sequences
    - Error/empty/loading states
    - Accessibility or localization notes
 
-   Non-Functional Quality Attributes:
+   **非功能质量属性(Non-Functional Quality Attributes)**:
    - Performance (latency, throughput targets)
    - Scalability (horizontal/vertical, limits)
    - Reliability & availability (uptime, recovery expectations)
@@ -92,29 +92,29 @@ Execution steps:
    - Security & privacy (authN/Z, data protection, threat assumptions)
    - Compliance / regulatory constraints (if any)
 
-   Integration & External Dependencies:
+   **集成与外部依赖(Integration & External Dependencies)**:
    - External services/APIs and failure modes
    - Data import/export formats
    - Protocol/versioning assumptions
 
-   Edge Cases & Failure Handling:
+   **边界情况与失败处理(Edge Cases & Failure Handling)**:
    - Negative scenarios
    - Rate limiting / throttling
    - Conflict resolution (e.g., concurrent edits)
 
-   Constraints & Tradeoffs:
+   **约束与权衡(Constraints & Tradeoffs)**:
    - Technical constraints (language, storage, hosting)
    - Explicit tradeoffs or rejected alternatives
 
-   Terminology & Consistency:
+   **术语与一致性(Terminology & Consistency)**:
    - Canonical glossary terms
    - Avoided synonyms / deprecated terms
 
-   Completion Signals:
+   **完成信号(Completion Signals)**:
    - Acceptance criteria testability
    - Measurable Definition of Done style indicators
 
-   Misc / Placeholders:
+   **杂项 / 占位符(Misc / Placeholders)**:
    - TODO markers / unresolved decisions
    - Ambiguous adjectives ("robust", "intuitive") lacking quantification
 
@@ -133,7 +133,7 @@ Execution steps:
     - Favor clarifications that reduce downstream rework risk or prevent misaligned acceptance tests.
     - If more than 5 categories remain unresolved, select the top 5 by (Impact * Uncertainty) heuristic.
 
-5. Sequential questioning loop (interactive):
+5. Sequential questioning loop (interactive / 顺序提问循环，交互式):
     - Present EXACTLY ONE question at a time.
     - For multiple‑choice questions:
        - **Analyze all options** and determine the **most suitable option** based on:
@@ -163,41 +163,41 @@ Execution steps:
        - If ambiguous, ask for a quick disambiguation (count still belongs to same question; do not advance).
        - Once satisfactory, record it in working memory (do not yet write to disk) and move to the next queued question.
     - Stop asking further questions when:
-       - All critical ambiguities resolved early (remaining queued items become unnecessary), OR
-       - User signals completion ("done", "good", "no more"), OR
-       - You reach 5 asked questions.
+        - All critical ambiguities resolved early (remaining queued items become unnecessary), OR
+        - User signals completion ("done", "good", "no more"), OR
+        - You reach 5 asked questions.
     - Never reveal future queued questions in advance.
     - If no valid questions exist at start, immediately report no critical ambiguities.
 
-6. Integration after EACH accepted answer (incremental update approach):
+6. Integration after EACH accepted answer (incremental update approach / 每个采纳答案后的集成，增量更新方式):
     - Maintain in-memory representation of the spec (loaded once at start) plus the raw file contents.
     - For the first integrated answer in this session:
-       - Ensure a `## Clarifications` section exists (create it just after the highest-level contextual/overview section per the spec template if missing).
-       - Under it, create (if not present) a `### Session YYYY-MM-DD` subheading for today.
+       - Ensure a `## 澄清记录(Clarifications)` section exists (create it just after the highest-level contextual/overview section per the spec template if missing).
+       - Under it, create (if not present) a `### 会话(Session) YYYY-MM-DD` subheading for today.
     - Append a bullet line immediately after acceptance: `- Q: <question> → A: <final answer>`.
     - Then immediately apply the clarification to the most appropriate section(s):
-       - Functional ambiguity → Update or add a bullet in Functional Requirements.
-       - User interaction / actor distinction → Update User Stories or Actors subsection (if present) with clarified role, constraint, or scenario.
-       - Data shape / entities → Update Data Model (add fields, types, relationships) preserving ordering; note added constraints succinctly.
-       - Non-functional constraint → Add/modify measurable criteria in Success Criteria > Measurable Outcomes (convert vague adjective to metric or explicit target).
-       - Edge case / negative flow → Add a new bullet under Edge Cases / Error Handling (or create such subsection if template provides placeholder for it).
+       - Functional ambiguity → Update or add a bullet in Functional Requirements (功能需求).
+       - User interaction / actor distinction → Update User Stories (用户故事) or Actors subsection (if present) with clarified role, constraint, or scenario.
+       - Data shape / entities → Update Data Model (数据模型, add fields, types, relationships) preserving ordering; note added constraints succinctly.
+       - Non-functional constraint → Add/modify measurable criteria in Success Criteria > Measurable Outcomes (成功标准 > 可衡量成果, convert vague adjective to metric or explicit target).
+       - Edge case / negative flow → Add a new bullet under Edge Cases / Error Handling (边界情况 / 错误处理, or create such subsection if template provides placeholder for it).
        - Terminology conflict → Normalize term across spec; retain original only if necessary by adding `(formerly referred to as "X")` once.
     - If the clarification invalidates an earlier ambiguous statement, replace that statement instead of duplicating; leave no obsolete contradictory text.
     - Save the spec file AFTER each integration to minimize risk of context loss (atomic overwrite).
     - Preserve formatting: do not reorder unrelated sections; keep heading hierarchy intact.
     - Keep each inserted clarification minimal and testable (avoid narrative drift).
 
-7. Validation (performed after EACH write plus final pass):
+7. Validation (performed after EACH write plus final pass / 校验，每次写入及最终均执行):
    - Clarifications session contains exactly one bullet per accepted answer (no duplicates).
    - Total asked (accepted) questions ≤ 5.
    - Updated sections contain no lingering vague placeholders the new answer was meant to resolve.
    - No contradictory earlier statement remains (scan for now-invalid alternative choices removed).
-   - Markdown structure valid; only allowed new headings: `## Clarifications`, `### Session YYYY-MM-DD`.
+   - Markdown structure valid; only allowed new headings: `## 澄清记录(Clarifications)`, `### 会话(Session) YYYY-MM-DD`.
    - Terminology consistency: same canonical term used across all updated sections.
 
 8. Write the updated spec back to `FEATURE_SPEC`.
 
-9. **Re-validate Spec Quality Checklist** (if it exists):
+9. **Re-validate Spec Quality Checklist** (if it exists / 重新校验规格质量检查清单):
    - Check if `FEATURE_DIR/checklists/requirements.md` exists.
    - If it does NOT exist, skip this step silently.
    - If it exists:
@@ -211,13 +211,12 @@ Execution steps:
         - If the state is unchanged: leave the marker as-is (preserve existing case to avoid cosmetic diffs).
      6. Save the updated checklist file. **Only toggle the `[ ]`/`[x]` marker portion of checkbox lines whose state changed.** All other file content — headings, metadata, notes, line ordering, whitespace — must remain unchanged to avoid noisy diffs.
      7. Compare the before-snapshot with the current state to compute three lists for the Completion Report:
-        - **Newly passing**: items that changed from unchecked to checked.
-        - **Regressions**: items that changed from checked to unchecked.
-        - **Still unchecked**: items that remain unchecked.
+        - **Newly passing** (新通过): items that changed from unchecked to checked.
+        - **Regressions** (回退): items that changed from checked to unchecked.
+        - **Still unchecked** (仍待处理): items that remain unchecked.
      8. Record the before/after pass counts as checked/total checkbox items (e.g., "12/16 → 15/16 items passing").
 
-Behavior rules:
-
+**Behavior rules** (行为规则):
 - If no meaningful ambiguities found (or all potential questions would be low-impact), respond: "No critical ambiguities detected worth formal clarification." and suggest proceeding.
 - If spec file missing, instruct user to run `/speckit.specify` first (do not create a new spec here).
 - Never exceed 5 total asked questions (clarification retries for a single question do not count as new questions).
@@ -228,7 +227,7 @@ Behavior rules:
 
 Context for prioritization: $ARGUMENTS
 
-## Mandatory Post-Execution Hooks
+## 强制后置钩子(Mandatory Post-Execution Hooks)
 
 **You MUST complete this section before reporting completion to the user.**
 
@@ -238,21 +237,21 @@ Check if `.specify/extensions.yml` exists in the project root.
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue to the Completion Report.
 - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
-  - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
+  - If the hook has no `condition` field, or it is null/empty, treat it as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
 - For each executable hook, output the following based on its `optional` flag:
-  - **Mandatory hook** (`optional: false`) — **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
+  - **Mandatory hook** (`optional: false` / 强制钩子) — **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
     ```
-    ## Extension Hooks
+    ## 扩展钩子(Extension Hooks)
 
     **Automatic Hook**: {extension}
     Executing: `/{command}`
     EXECUTE_COMMAND: {command}
     ```
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
-  - **Optional hook** (`optional: true`):
+  - **Optional hook** (`optional: true` / 可选钩子):
     ```
-    ## Extension Hooks
+    ## 扩展钩子(Extension Hooks)
 
     **Optional Hook**: {extension}
     Command: `/{command}`
@@ -262,7 +261,7 @@ Check if `.specify/extensions.yml` exists in the project root.
     To execute: `/{command}`
     ```
 
-## Completion Report
+## 完成报告(Completion Report)
 
 Report completion (after questioning loop ends or early termination):
 - Number of questions asked & answered.
@@ -273,7 +272,7 @@ Report completion (after questioning loop ends or early termination):
 - If any Outstanding or Deferred remain, recommend whether to proceed to `/speckit.plan` or run `/speckit.clarify` again later post-plan.
 - Suggested next command.
 
-## Done When
+## 完成条件(Done When)
 
 - [ ] Spec ambiguities identified and clarifications integrated into spec file
 - [ ] Spec quality checklist re-validated against updated spec (if `FEATURE_DIR/checklists/requirements.md` exists)

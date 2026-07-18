@@ -5,6 +5,14 @@
 
 [[changelog]]
 date = "2026-07-18"
+content = "Add Command File Localization strategy to constitution (v1.5.0) and update codebuddy.manifest.json SHA256 hashes after localizing speckit command files"
+
+[[changelog]]
+date = "2026-07-18"
+content = "Localize .codebuddy/commands/*.md (speckit command files) to Chinese(English) bilingual format"
+
+[[changelog]]
+date = "2026-07-18"
 content = "Add mandatory changelog registration rule: all changes and new tasks must appear in GET /common/changelog"
 
 [[changelog]]

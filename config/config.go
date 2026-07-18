@@ -73,6 +73,8 @@ func defaultConfig() *Config {
 			},
 		},
 		Changelog: []ChangelogConfig{
+			{Date: "2026-07-18", Content: "Add Command File Localization strategy to constitution (v1.5.0) and update codebuddy.manifest.json SHA256 hashes after localizing speckit command files"},
+			{Date: "2026-07-18", Content: "Localize .codebuddy/commands/*.md (speckit command files) to Chinese(English) bilingual format"},
 			{Date: "2026-07-18", Content: "Add mandatory changelog registration rule: all changes and new tasks must appear in GET /common/changelog"},
 			{Date: "2026-07-17", Content: "Read server listen port from config.toml in main startup"},
 			{Date: "2026-07-17", Content: "Add independent SQLite instance and /sqlite/testuser CRUD test interface"},
