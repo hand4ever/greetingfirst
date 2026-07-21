@@ -4,6 +4,10 @@
 # Append a new [[changelog]] entry for every change / new task.
 
 [[changelog]]
+date = "2026-07-21"
+content = "Initialize CodeBuddy skill system (.codebuddy/skills) and add greeting-helper skill for project constitution compliance self-check"
+
+[[changelog]]
 date = "2026-07-18"
 content = "Add Command File Localization strategy to constitution (v1.5.0) and update codebuddy.manifest.json SHA256 hashes after localizing speckit command files"
 
