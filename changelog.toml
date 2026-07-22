@@ -4,6 +4,10 @@
 # Append a new [[changelog]] entry for every change / new task.
 
 [[changelog]]
+date = "2026-07-22"
+content = "Upgrade spec-kit (speckit) dev tooling to v0.13.2 — refresh project templates, scripts, and codebuddy commands"
+
+[[changelog]]
 date = "2026-07-21"
 content = "Initialize CodeBuddy skill system (.codebuddy/skills) and add greeting-helper skill for project constitution compliance self-check"
 

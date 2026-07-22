@@ -1,50 +1,50 @@
-# [项目名称] 项目宪法(Constitution)
+# [PROJECT_NAME] Constitution
 <!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
 
-## 核心原则(Core Principles)
+## Core Principles
 
-### [原则_1_名称]
+### [PRINCIPLE_1_NAME]
 <!-- Example: I. Library-First -->
-[原则_1_描述]
+[PRINCIPLE_1_DESCRIPTION]
 <!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
 
-### [原则_2_名称]
+### [PRINCIPLE_2_NAME]
 <!-- Example: II. CLI Interface -->
-[原则_2_描述]
+[PRINCIPLE_2_DESCRIPTION]
 <!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
 
-### [原则_3_名称]
+### [PRINCIPLE_3_NAME]
 <!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[原则_3_描述]
+[PRINCIPLE_3_DESCRIPTION]
 <!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
 
-### [原则_4_名称]
+### [PRINCIPLE_4_NAME]
 <!-- Example: IV. Integration Testing -->
-[原则_4_描述]
+[PRINCIPLE_4_DESCRIPTION]
 <!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
 
-### [原则_5_名称]
+### [PRINCIPLE_5_NAME]
 <!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[原则_5_描述]
+[PRINCIPLE_5_DESCRIPTION]
 <!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
 
-## [章节_2_名称]
+## [SECTION_2_NAME]
 <!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
 
-[章节_2_内容]
+[SECTION_2_CONTENT]
 <!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
 
-## [章节_3_名称]
+## [SECTION_3_NAME]
 <!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
 
-[章节_3_内容]
+[SECTION_3_CONTENT]
 <!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
 
-## 治理(Governance)
+## Governance
 <!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[治理规则]
+[GOVERNANCE_RULES]
 <!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
 
-**版本(Version)**: [宪法版本] | **批准日期(Ratified)**: [批准日期] | **最后修订(Last Amended)**: [最后修订日期]
+**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
 <!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->

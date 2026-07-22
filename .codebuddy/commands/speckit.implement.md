@@ -2,7 +2,7 @@
 description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
 ---
 
-## 用户输入(User Input)
+## User Input
 
 ```text
 $ARGUMENTS
@@ -10,20 +10,20 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## 执行前检查(Pre-Execution Checks)
+## Pre-Execution Checks
 
-**Check for extension hooks (before implementation / 实现前的扩展钩子检查)**:
+**Check for extension hooks (before implementation)**:
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_implement` key
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
 - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
-  - If the hook has no `condition` field, or it is null/empty, treat it as executable
+  - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
 - For each executable hook, output the following based on its `optional` flag:
-  - **Optional hook** (`optional: true` / 可选钩子):
+  - **Optional hook** (`optional: true`):
     ```
-    ## 扩展钩子(Extension Hooks)
+    ## Extension Hooks
 
     **Optional Pre-Hook**: {extension}
     Command: `/{command}`
@@ -32,9 +32,9 @@ You **MUST** consider the user input before proceeding (if not empty).
     Prompt: {prompt}
     To execute: `/{command}`
     ```
-  - **Mandatory hook** (`optional: false` / 强制钩子):
+  - **Mandatory hook** (`optional: false`):
     ```
-    ## 扩展钩子(Extension Hooks)
+    ## Extension Hooks
 
     **Automatic Pre-Hook**: {extension}
     Executing: `/{command}`
@@ -45,11 +45,11 @@ You **MUST** consider the user input before proceeding (if not empty).
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
-## 大纲(Outline)
+## Outline
 
 1. Run `.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
-2. **Check checklists status** (检查检查清单状态, if FEATURE_DIR/checklists/ exists):
+2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - Scan all checklist files in the checklists/ directory
    - For each checklist, count:
      - Total items: All lines matching `- [ ]` or `- [X]` or `- [x]`
@@ -66,21 +66,21 @@ You **MUST** consider the user input before proceeding (if not empty).
      ```
 
    - Calculate overall status:
-     - **PASS** (通过): All checklists have 0 incomplete items
-     - **FAIL** (失败): One or more checklists have incomplete items
+     - **PASS**: All checklists have 0 incomplete items
+     - **FAIL**: One or more checklists have incomplete items
 
-   - **If any checklist is incomplete** (若有检查清单未完成):
+   - **If any checklist is incomplete**:
      - Display the table with incomplete item counts
      - **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
      - Wait for user response before continuing
      - If user says "no" or "wait" or "stop", halt execution
      - If user says "yes" or "proceed" or "continue", proceed to step 3
 
-   - **If all checklists are complete** (若所有检查清单已完成):
+   - **If all checklists are complete**:
      - Display the table showing all checklists passed
      - Automatically proceed to step 3
 
-3. Load and analyze the implementation context (加载并分析实现上下文):
+3. Load and analyze the implementation context:
    - **REQUIRED**: Read tasks.md for the complete task list and execution plan
    - **REQUIRED**: Read plan.md for tech stack, architecture, and file structure
    - **IF EXISTS**: Read data-model.md for entities and relationships
@@ -89,11 +89,11 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **IF EXISTS**: Read .specify/memory/constitution.md for governance constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
 
-4. **Project Setup Verification** (项目初始化校验):
+4. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:
 
-   **Detection & Creation Logic** (检测与创建逻辑):
-   - Check if the following command succeeds to determine if the repository is a git repo (create/verify .gitignore if so / 若是 git 仓库则创建或校验 .gitignore):
+   **Detection & Creation Logic**:
+   - Check if the following command succeeds to determine if the repository is a git repo (create/verify .gitignore if so):
 
      ```sh
      git rev-parse --git-dir 2>/dev/null
@@ -107,10 +107,10 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Check if terraform files (*.tf) exist → create/verify .terraformignore
    - Check if .helmignore needed (helm charts present) → create/verify .helmignore
 
-   **If ignore file already exists** (若忽略文件已存在): Verify it contains essential patterns, append missing critical patterns only
-   **If ignore file missing** (若忽略文件缺失): Create with full pattern set for detected technology
+   **If ignore file already exists**: Verify it contains essential patterns, append missing critical patterns only
+   **If ignore file missing**: Create with full pattern set for detected technology
 
-   **Common Patterns by Technology** (按技术的常见模式, from plan.md tech stack):
+   **Common Patterns by Technology** (from plan.md tech stack):
    - **Node.js/JavaScript/TypeScript**: `node_modules/`, `dist/`, `build/`, `*.log`, `.env*`
    - **Python**: `__pycache__/`, `*.pyc`, `.venv/`, `venv/`, `dist/`, `*.egg-info/`
    - **Java**: `target/`, `*.class`, `*.jar`, `.gradle/`, `build/`
@@ -124,44 +124,44 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **C**: `build/`, `bin/`, `obj/`, `out/`, `*.o`, `*.a`, `*.so`, `*.exe`, `*.dll`, `autom4te.cache/`, `config.status`, `config.log`, `.idea/`, `*.log`, `.env*`
    - **Swift**: `.build/`, `DerivedData/`, `*.swiftpm/`, `Packages/`
    - **R**: `.Rproj.user/`, `.Rhistory`, `.RData`, `.Ruserdata`, `*.Rproj`, `packrat/`, `renv/`
-   - **Universal** (通用): `.DS_Store`, `Thumbs.db`, `*.tmp`, `*.swp`, `.vscode/`, `.idea/`
+   - **Universal**: `.DS_Store`, `Thumbs.db`, `*.tmp`, `*.swp`, `.vscode/`, `.idea/`
 
-   **Tool-Specific Patterns** (工具特定模式):
+   **Tool-Specific Patterns**:
    - **Docker**: `node_modules/`, `.git/`, `Dockerfile*`, `.dockerignore`, `*.log*`, `.env*`, `coverage/`
    - **ESLint**: `node_modules/`, `dist/`, `build/`, `coverage/`, `*.min.js`
    - **Prettier**: `node_modules/`, `dist/`, `build/`, `coverage/`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`
    - **Terraform**: `.terraform/`, `*.tfstate*`, `*.tfvars`, `.terraform.lock.hcl`
    - **Kubernetes/k8s**: `*.secret.yaml`, `secrets/`, `.kube/`, `kubeconfig*`, `*.key`, `*.crt`
 
-5. Parse tasks.md structure and extract (解析 tasks.md 结构并提取):
-   - **Task phases** (任务阶段): Setup, Tests, Core, Integration, Polish
-   - **Task dependencies** (任务依赖): Sequential vs parallel execution rules
-   - **Task details** (任务详情): ID, description, file paths, parallel markers [P]
-   - **Execution flow** (执行流): Order and dependency requirements
+5. Parse tasks.md structure and extract:
+   - **Task phases**: Setup, Tests, Core, Integration, Polish
+   - **Task dependencies**: Sequential vs parallel execution rules
+   - **Task details**: ID, description, file paths, parallel markers [P]
+   - **Execution flow**: Order and dependency requirements
 
-6. Execute implementation following the task plan (按任务计划执行实现):
-   - **Phase-by-phase execution** (逐阶段执行): Complete each phase before moving to the next
-   - **Respect dependencies** (尊重依赖): Run sequential tasks in order, parallel tasks [P] can run together
-   - **Follow TDD approach** (遵循 TDD 方法): Execute test tasks before their corresponding implementation tasks
-   - **File-based coordination** (基于文件的协调): Tasks affecting the same files must run sequentially
-   - **Validation checkpoints** (校验检查点): Verify each phase completion before proceeding
+6. Execute implementation following the task plan:
+   - **Phase-by-phase execution**: Complete each phase before moving to the next
+   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together
+   - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
+   - **File-based coordination**: Tasks affecting the same files must run sequentially
+   - **Validation checkpoints**: Verify each phase completion before proceeding
 
-7. Implementation execution rules (实现执行规则):
-   - **Setup first** (先初始化): Initialize project structure, dependencies, configuration
-   - **Tests before code** (先测试后代码): If you need to write tests for contracts, entities, and integration scenarios
-   - **Core development** (核心开发): Implement models, services, CLI commands, endpoints
-   - **Integration work** (集成工作): Database connections, middleware, logging, external services
-   - **Polish and validation** (打磨与校验): Unit tests, performance optimization, documentation
+7. Implementation execution rules:
+   - **Setup first**: Initialize project structure, dependencies, configuration
+   - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
+   - **Core development**: Implement models, services, CLI commands, endpoints
+   - **Integration work**: Database connections, middleware, logging, external services
+   - **Polish and validation**: Unit tests, performance optimization, documentation
 
-8. Progress tracking and error handling (进度跟踪与错误处理):
+8. Progress tracking and error handling:
    - Report progress after each completed task
    - Halt execution if any non-parallel task fails
    - For parallel tasks [P], continue with successful tasks, report failed ones
    - Provide clear error messages with context for debugging
    - Suggest next steps if implementation cannot proceed
-   - **IMPORTANT** (重要): For completed tasks, make sure to mark the task off as [X] in the tasks file.
+   - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
 
-9. Completion validation (完成校验):
+9. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
    - Validate that tests pass and coverage meets requirements
@@ -169,7 +169,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
 
-## 强制后置钩子(Mandatory Post-Execution Hooks)
+## Mandatory Post-Execution Hooks
 
 **You MUST complete this section before reporting completion to the user.**
 
@@ -179,21 +179,21 @@ Check if `.specify/extensions.yml` exists in the project root.
 - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue to the Completion Report.
 - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
-  - If the hook has no `condition` field, or it is null/empty, treat it as executable
+  - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
 - For each executable hook, output the following based on its `optional` flag:
-  - **Mandatory hook** (`optional: false` / 强制钩子) — **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
+  - **Mandatory hook** (`optional: false`) — **You MUST emit `EXECUTE_COMMAND:` for each mandatory hook**:
     ```
-    ## 扩展钩子(Extension Hooks)
+    ## Extension Hooks
 
     **Automatic Hook**: {extension}
     Executing: `/{command}`
     EXECUTE_COMMAND: {command}
     ```
     After emitting the block above you MUST actually invoke the hook and wait for it to finish before continuing. Run it the same way you would run the command yourself in this agent/session (the invocation may differ from the literal `{command}` id shown above, e.g. a skills-mode agent runs it as `/skill:speckit-...` or `$speckit-...`). Emitting the block alone does not run the hook.
-  - **Optional hook** (`optional: true` / 可选钩子):
+  - **Optional hook** (`optional: true`):
     ```
-    ## 扩展钩子(Extension Hooks)
+    ## Extension Hooks
 
     **Optional Hook**: {extension}
     Command: `/{command}`
@@ -203,13 +203,13 @@ Check if `.specify/extensions.yml` exists in the project root.
     To execute: `/{command}`
     ```
 
-## 完成报告(Completion Report)
+## Completion Report
 
 Report final status with summary of completed work.
 
-## 完成条件(Done When)
+## Done When
 
-- [ ] All tasks in tasks.md completed and marked `[X]` (tasks.md 中所有任务已完成并标记为 `[X]`)
-- [ ] Implementation validated against specification, plan, and test coverage (实现已对照规格、计划与测试覆盖校验)
-- [ ] Extension hooks dispatched or skipped according to the rules in Mandatory Post-Execution Hooks above (扩展钩子已按上述规则派发或跳过)
-- [ ] Completion reported to user with summary of completed work (已向用户报告完成状态及已完成工作摘要)
+- [ ] All tasks in tasks.md completed and marked `[X]`
+- [ ] Implementation validated against specification, plan, and test coverage
+- [ ] Extension hooks dispatched or skipped according to the rules in Mandatory Post-Execution Hooks above
+- [ ] Completion reported to user with summary of completed work
